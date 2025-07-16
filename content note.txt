@@ -1,0 +1,17 @@
+TLIP Helper 
+
+
+Development:
+Idea, without any limitation
+Target platforms (VR, tablet, Web...)
+Reasonable and doable design based on (1)
+How to distribute to student
+Related course material or knowledge. What they want student learn by using this application, solid reference
+Development timeline
+Hiring plan
+
+pedagogy:
+What they want student learn by using this application
+
+implementation:
+How to distribute to student

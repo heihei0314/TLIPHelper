@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Education Innovation Project Helper</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" xintegrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- ADDED: Lucide Icons for a modern look -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide-static@latest/dist/lucide.min.js"></script>
+</head>
+<body>
+    <div id="progressBarContainer">
+        <div id="progressBar"></div>
+        <span id="progressText">0% Complete</span>
+    </div>
+
+    <div class="main-content">
+        <h1 class="main-title">Education Innovation Project Helper</h1>
+        <p class="sub-title">Let's draft your preliminary TLIP proposal, one step at a time. The TLIP Helper will guide you.</p>
+
+        <div class="bots-grid">
+            <!-- The structure for ALL 6 bot containers is updated like this -->
+            <div class="container" id="objective-container">
+                <div class="step-header">
+                    <h2>1. Identify Project Objective</h2>
+                </div>
+                <form class="chatForm" data-purpose="objective">
+                    <div class="chat-message-row">
+                        <img src="assets/bot.png" id="bot-icon" alt="Bot Icon">
+                        <div class="guiding-question-wrapper">
+                            <div class="guiding-question"></div>
+                        </div>
+                    </div>
+                    <div class="options-area hidden-dynamic"></div>
+                    <div class="input-wrapper">
+                        <input type="text" class="userInput" placeholder="Select an option or refine your project's goal..." autocomplete="off">
+                        <button type="submit" class="submitBtn" title="Refine Step"><i data-lucide="send">Send</i></button>
+                    </div>
+                </form>
+                <div class="response-area">Your project's objective(s) will be summarized here...</div>
+                <div class="next-step-arrow" title="Next Step">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </div>
+
+            <div class="container" id="outcomes-container">
+                <div class="step-header">
+                    <h2>2. Define Learning Outcomes</h2>
+                </div>
+                <form class="chatForm" data-purpose="outcomes">
+                    <div class="chat-message-row">
+                        <img src="assets/bot.png" id="bot-icon" alt="Bot Icon">
+                        <div class="guiding-question-wrapper">
+                            <div class="guiding-question"></div>
+                        </div>
+                    </div>
+                    <div class="options-area hidden-dynamic"></div>
+                     <div class="input-wrapper">
+                        <input type="text" class="userInput" placeholder="Use ABCD model to define learning outcomes..." autocomplete="off">
+                        <button type="submit" class="submitBtn" title="Refine Step"><i data-lucide="send">Send</i></button>
+                    </div>
+                </form>
+                <div class="response-area">Your learning outcomes will be summarized here...</div>
+                <div class="next-step-arrow" title="Next Step">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </div>
+
+            <div class="container" id="pedagogy-container">
+                <div class="step-header">
+                    <h2>3. Find Pedagogy & Technology</h2>
+                </div>
+                <form class="chatForm" data-purpose="pedagogy">
+                    <div class="chat-message-row">
+                        <img src="assets/bot.png" id="bot-icon" alt="Bot Icon">
+                        <div class="guiding-question-wrapper">
+                            <div class="guiding-question"></div>
+                        </div>
+                    </div>
+                    <div class="options-area hidden-dynamic"></div>
+                    <div class="input-wrapper">
+                        <input type="text" class="userInput" placeholder="Select an option or refine..." autocomplete="off">
+                        <button type="submit" class="submitBtn" title="Refine Step"><i data-lucide="send">Send</i></button>
+                    </div>
+                </form>
+                <div class="response-area">Your chosen pedagogy and/or technology will be summarized here...</div>
+                <div class="next-step-arrow" title="Next Step">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </div>
+
+            <div class="container" id="development-container">
+                <div class="step-header">
+                    <h2>4. Plan Development</h2>
+                </div>
+                <form class="chatForm" data-purpose="development">
+                    <div class="chat-message-row">
+                        <img src="assets/bot.png" id="bot-icon" alt="Bot Icon">
+                        <div class="guiding-question-wrapper">
+                            <div class="guiding-question"></div>
+                        </div>
+                    </div>
+                    <div class="options-area hidden-dynamic"></div>
+                    <div class="input-wrapper">
+                        <input type="text" class="userInput" placeholder="How to develop the application/teaching materials?" autocomplete="off">
+                        <button type="submit" class="submitBtn" title="Refine Step"><i data-lucide="send">Send</i></button>
+                    </div>
+                </form>
+                <div class="response-area">Your development plan will be summarized here...</div>
+                <div class="next-step-arrow" title="Next Step">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </div>
+
+            <div class="container" id="implementation-container">
+                <div class="step-header">
+                    <h2>5. Plan Implementation</h2>
+                </div>
+                <form class="chatForm" data-purpose="implementation">
+                    <div class="chat-message-row">
+                        <img src="assets/bot.png" id="bot-icon" alt="Bot Icon">
+                        <div class="guiding-question-wrapper">
+                            <div class="guiding-question"></div>
+                        </div>
+                    </div>
+                    <div class="options-area hidden-dynamic"></div>
+                    <div class="input-wrapper">
+                        <input type="text" class="userInput" placeholder="Select an option or refine..." autocomplete="off">
+                        <button type="submit" class="submitBtn" title="Refine Step"><i data-lucide="send">Send</i></button>
+                    </div>
+                </form>
+                <div class="response-area">Your implementation plan will be summarized here...</div>
+                <div class="next-step-arrow" title="Next Step">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </div>
+
+            <div class="container" id="evaluation-container">
+                <div class="step-header">
+                    <h2>6. Plan Evaluation</h2>
+                </div>
+                <form class="chatForm" data-purpose="evaluation">
+                    <div class="chat-message-row">
+                        <img src="assets/bot.png" id="bot-icon" alt="Bot Icon">
+                        <div class="guiding-question-wrapper">
+                            <div class="guiding-question"></div>
+                        </div>
+                    </div>
+                    <div class="options-area hidden-dynamic"></div>
+                    <div class="input-wrapper">
+                        <input type="text" class="userInput" placeholder="Select an option or refine..." autocomplete="off">
+                        <button type="submit" class="submitBtn" title="Refine Step"><i data-lucide="send">Send</i></button>
+                    </div>
+                </form>
+                <div class="response-area">Your evaluation plan will be summarized here...</div>
+                <div style="right: calc(50% - 22px); " class="next-step-arrow" title="Next Step">
+                    <i class="fa-solid fa-arrow-down"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="integration-section">
+            <h2>Final Step!</h2>
+            <p>After refining the steps, synthesize them into a preliminary proposal.</p>
+            <button id="integrateBtn"><i data-lucide="file-check-2"></i>Synthesize</button>
+            <div id="finalResponseArea" class="response-area">The first draft of the project plan will be generated here...</div>
+        </div>
+    </div>
+
+    <script src="js/script.js" defer></script>
+    <script>
+        // Call lucide.createIcons() after the DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

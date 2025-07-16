@@ -1,0 +1,277 @@
+/* --- Global & Fonts --- */
+:root {
+    --primary-color: #007bff;
+    --success-color: #28a745;
+    --background-color: #f4f7f9;
+    --container-background: #ffffff;
+    --text-color: #333;
+    --light-text-color: #555;
+    --border-color: #dee2e6;
+    --ai-bubble-color: #e9ecef;
+}
+
+body { 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+    background-color: var(--background-color); 
+    color: var(--text-color); 
+    margin: 0; 
+    /* This pushes all content down by the height of the bar, preventing overlap. */
+    padding-top: 25px; /* For fixed progress bar */
+}
+
+/* --- Progress Bar Styles --- */
+#progressBarContainer {
+    position: fixed; /* This fixes the element to the browser window */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3em;
+    background-color: #e9ecef;
+    border-bottom: 1px solid #dee2e6;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#progressBar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0%; 
+    background-color: #28a745;
+    transition: width 0.4s ease-in-out;
+}
+
+#progressText {
+    position: relative;
+    z-index: 1001;
+    color: #212529;
+    font-weight: bold;
+    font-size: 0.8rem;
+    text-shadow: 0 0 2px white;
+}
+
+/* --- Main Layout --- */
+.main-content {
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.main-title {
+    padding-top: 2rem;
+    text-align: center; 
+    color: #1c1e21; 
+}
+
+.sub-title { text-align: center; color: var(--light-text-color); margin-top: -1rem; margin-bottom: 3rem; }
+
+.bots-grid { 
+    display: flex; 
+    flex-direction: row; /* Single row layout */
+    align-items: flex-start;     
+    flex-wrap: nowrap;
+    justify-content: flex-start; 
+    gap: 1.5rem; 
+    padding: 0 2rem;
+    overflow: auto;
+    max-width: 60vw;
+    margin: 0 auto;
+}
+
+/* --- Bot Container Styling --- */
+.container { 
+    background: var(--container-background); 
+    padding: 2rem; 
+    border-radius: 12px; 
+    border: 1px solid var(--border-color);
+    display: flex; 
+    flex-direction: column; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    flex-basis: 93%;
+    flex-shrink: 0;
+    position: relative; 
+}
+
+.step-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+.step-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+.step-header i {
+    color: var(--primary-color);
+    width: 32px;
+    height: 32px;
+}
+
+/* --- Dynamic Guiding Question --- */
+.chat-message-row {
+    display: flex;
+    align-items: flex-start; /* Aligns icon and bubble to their top edges */
+    gap: 0.75rem;            /* Space between the icon and the bubble */
+    margin-bottom: 1rem;     /* Space below the entire bot message */
+}
+.guiding-question-wrapper {
+    background-color: var(--ai-bubble-color);
+    padding: 1rem;
+    border-radius: 12px 12px 12px 0; /* Chat bubble shape */
+    margin-bottom: 1rem;
+    flex-grow: 1; /* Allows the bubble to take up remaining space if needed */
+}
+#bot-icon { width: 3.5em; height: 3.5em; }
+
+.guiding-question {
+    --char-count: 1;
+    --typing-duration: 2s;
+
+    margin: 0; 
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--text-color);
+    line-height: 1.5;
+    position: relative; /* Needed for positioning pseudo-elements if you use them */
+}
+/* The class that triggers the animation */
+.guiding-question.is-typing-css {
+    /* Ensure the text doesn't wrap, which would break the width animation */
+    white-space: nowrap;
+    overflow: hidden;
+
+    /* This border will act as our blinking cursor */
+    border-right: 3px solid rgba(0, 0, 0, 0.75);
+    
+    /* The two animations running at once: one for typing, one for blinking */
+    animation: 
+        typing var(--typing-duration) steps(var(--char-count), end) forwards,
+        blink 0.75s step-end infinite;
+}
+/* Keyframes for the typing effect */
+/* It animates the width from 0 to 100%, revealing the text */
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+/* Keyframes for the blinking cursor effect */
+@keyframes blink {
+    from, to { border-color: transparent; }
+    50% { border-color: #3498db; } /* Use a color from your theme */
+}
+
+/* --- Options & Input --- */
+.options-area {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding-left: calc(24px + 0.75rem); /* Align with bubble text */
+}
+
+.option-btn {
+    background-color: #fff;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    padding: 8px 14px;
+    border-radius: 20px; /* Pill shape */
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.option-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.input-wrapper {
+    display: flex;
+    gap: 0.5rem;
+}
+.userInput { 
+    flex-grow: 1;
+    padding: 12px; 
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+}
+.userInput:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+.submitBtn { 
+    background-color: var(--primary-color); 
+    color: white; 
+    border: none; 
+    padding: 0 1rem;
+    border-radius: 8px; 
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.submitBtn:hover { background-color: #0056b3; }
+
+
+/* --- Response & Integration --- */
+.response-area { 
+    margin-top: 1.5rem;
+    padding: 1rem; 
+    background-color: #f8f9fa; 
+    border: 1px solid var(--border-color);
+    border-radius: 8px; 
+    min-height: 50px; 
+    font-size: 2rem; 
+    line-height: 1.6;
+    transition: all 0.3s;
+}
+.response-area.completed {
+    background-color: #e2f0d9;
+    border-color: #c5e0b4;
+}
+
+.next-step-arrow {
+    position: absolute;   /* Position it relative to the .container */
+    bottom: 0.5rem;       /* Distance from the bottom */
+    right: 0.5rem;        /* Distance from the right */
+    /* Styling to make it look like a circular button */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;          /* A good size for clicking/tapping */
+    height: 44px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 50%;   /* Makes it a perfect circle */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+.next-step-arrow i {
+    font-size: 1.25rem; /* ~20px. Adjust as needed. */
+    line-height: 1;   /* Prevents extra vertical space */
+}
+
+.container h2 { margin-top: 0; color: #007bff; }
+input[type="text"] { width: 95%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 0.9rem; }
+button { background-color: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 1rem; transition: background-color 0.2s; }
+button:hover { background-color: #0056b3; }
+button:disabled { background-color: #aaa; cursor: not-allowed; }
+.response-area { margin-top: 1rem; padding: 1rem; background-color: #e9ecef; border-radius: 5px; min-height: 80px; text-align: left; font-size: 0.9rem; white-space: pre-wrap; word-wrap: break-word; flex-grow: 1; }
+.integration-section { text-align: center; background: white; padding: 2rem; margin: 3rem auto; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 800px; }
+#integrateBtn { background-color: #28a745; font-size: 1.2rem; padding: 12px 25px; }
+#integrateBtn:hover { background-color: #218838; }
+#finalResponseArea { overflow-y: auto; margin-top: 1.5rem; background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; max-height: 50vh; }
+
+.response-area.completed {
+    background-color: #e2f0d9; /* A light green to signify completion */
+    border: 1px solid #c5e0b4;
+}
