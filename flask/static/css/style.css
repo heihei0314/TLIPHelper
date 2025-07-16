@@ -11,8 +11,7 @@
 }
 html {
     /* Add scroll-padding-top to account for the fixed header */
-    /* The progress bar container is 3em tall, so 4em provides a bit of extra space */
-    scroll-padding-top: 4em; /* Adjust this value if your fixed header changes height */
+    scroll-padding-top: 10em; /* Adjust this value if fixed header changes height */
 }
 
 body { 
@@ -20,8 +19,6 @@ body {
     background-color: var(--background-color); 
     color: var(--text-color); 
     margin: 0; 
-    /* This pushes all content down by the height of the bar, preventing overlap. */
-    padding-top: 25px; /* For fixed progress bar */
 }
 
 /* --- Progress Bar Styles --- */
@@ -43,7 +40,7 @@ body {
     position: absolute;
     top: 0;
     left: 0;
-    height: 100%;
+    height: 3em;
     width: 0%; 
     background-color: #28a745;
     transition: width 0.4s ease-in-out;
@@ -57,20 +54,28 @@ body {
     font-size: 0.8rem;
     text-shadow: 0 0 2px white;
 }
-
-/* --- Main Layout --- */
-.main-content {
-    margin: 0 auto;
-    padding: 2rem 1rem;
+.title-content {
+    position: fixed;
+    z-index: 1001;
+    top: 3em;
+    left: 0;
+    width: 100%; 
+    text-align: center; 
+    background-color: var(--background-color);
 }
-
 .main-title {
-    padding-top: 2rem;
     text-align: center; 
     color: #1c1e21; 
 }
 
 .sub-title { text-align: center; color: var(--light-text-color); margin-top: -1rem; margin-bottom: 3rem; }
+
+/* --- Main Layout --- */
+.main-content {
+    margin: 0em auto;
+    padding: 10em 1rem;
+}
+
 
 .bots-grid { 
     display: flex; 
@@ -180,7 +185,7 @@ body {
     padding-left: calc(24px + 0.75rem); /* Align with bubble text */
 }
 
-.option-btn {
+.option-button {
     background-color: #fff;
     color: var(--primary-color);
     border: 1px solid var(--primary-color);
@@ -192,7 +197,7 @@ body {
     text-align: left;
 }
 
-.option-btn:hover {
+.option-button:hover {
     background-color: var(--primary-color);
     color: white;
 }

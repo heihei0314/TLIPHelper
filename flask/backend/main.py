@@ -14,7 +14,7 @@ AZURE_OPENAI_DEPLOYMENT_NAME = None
 
 try:
     script_dir = os.path.dirname(__file__)
-    dotenv_path = os.path.join(script_dir, '../../.env')
+    dotenv_path = os.path.join(script_dir, '.env')
     load_dotenv(dotenv_path=dotenv_path)
 
     AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")

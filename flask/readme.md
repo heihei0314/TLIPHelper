@@ -79,18 +79,23 @@ pip install -r /flask/requirements.txt
 1.  **Navigate into the `backend` directory:**
 
     ```bash
-    cd flask/backend
+    cd backend
     ```
 
 2.  **Run the Flask application:**
+    Using gunicorn to run the application in daemon mode.
+    ```bash
+    gunicorn --workers 3 --bind 127.0.0.1:8002 app:app --daemon --pid /tmp/tlip_helper_gunicorn.pid
+    ```
 
+    or
+
+    Typcially run in debug mode on `http://127.0.0.1:8002/`.
     ```bash
     python app.py
     ```
 
-    The application will typically run on `http://127.0.0.1:8001/`.
-
-3.  **Open your web browser** and navigate to `http://127.0.0.1:8001/`.
+3.  **Open your web browser** and navigate to `http://127.0.0.1:8002/` or `http://yourdomain.com/`.
 
 ## Running Tests
 
@@ -124,17 +129,10 @@ To run the unit tests for the backend logic:
 7.  Once you have completed all steps, click the "Synthesize" button in the "Final Step!" section to generate a comprehensive project proposal based on all your inputs.
 
 ## Future Improvements
-
-* **Robust Session Management:** Implement a more robust session management system (e.g., using Flask-Login with a database like SQLite or PostgreSQL) to persist user progress across browser sessions and handle multiple concurrent users more effectively. The current `user_sessions` dictionary is in-memory and will reset if the server restarts.
-* **Error Handling:** Enhance frontend error display for better user feedback (e.g., modal dialogs for critical errors).
-* **User Authentication:** Add user authentication to personalize experiences and securely store individual project drafts.
-* **Database Integration:** Store project drafts and user data in a database (e.g., PostgreSQL, MongoDB) for persistence and retrieval.
-* **Frontend Enhancements:**
-    * Add more dynamic loading indicators.
-    * Improve accessibility.
-    * Consider a more advanced frontend framework (e.g., React, Vue) for complex UI interactions if the project scales.
-* **AI Model Flexibility:** Allow users to select different AI models or configurations.
-* **Markdown Rendering:** Render the final proposal with Markdown to HTML for better formatting.
+**imporve the prompts**
+**imporve the UI**
+**Add a agent to judge**
+**Add a agent to identify the finishing line for each step**
 
 ## License
 
