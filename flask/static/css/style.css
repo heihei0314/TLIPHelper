@@ -9,6 +9,11 @@
     --border-color: #dee2e6;
     --ai-bubble-color: #e9ecef;
 }
+html {
+    /* Add scroll-padding-top to account for the fixed header */
+    /* The progress bar container is 3em tall, so 4em provides a bit of extra space */
+    scroll-padding-top: 4em; /* Adjust this value if your fixed header changes height */
+}
 
 body { 
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
@@ -254,6 +259,7 @@ body {
     color: white;
     border-radius: 50%;   /* Makes it a perfect circle */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
 }
 .next-step-arrow i {
     font-size: 1.25rem; /* ~20px. Adjust as needed. */

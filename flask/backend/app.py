@@ -97,4 +97,4 @@ if __name__ == '__main__':
         os.makedirs(os.path.join(static_dir, 'js'))
         os.makedirs(os.path.join(static_dir, 'assets'))
 
-    app.run(debug=True, port=8001) # Run on port 8001 in debug mode
+    app.run(debug=True, port=8002) # Run on port 8001 in debug mode

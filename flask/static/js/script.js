@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const finalResponseArea = document.getElementById('finalResponseArea');
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
+    const nextStepArrows = document.querySelectorAll('.next-step-arrow'); // Select all next step arrows
 
     // Store the current summaries for each purpose
     // This will be sent with each request to the backend to maintain context
@@ -27,51 +28,66 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to display messages (guiding question or summary)
     function displayMessage(formElement, data) {
-        const guidingQuestionDiv = formElement.querySelector('.guiding-question');
-        const optionsArea = formElement.querySelector('.options-area');
-        const responseArea = formElement.parentElement.querySelector('.response-area');
-        const userInputField = formElement.querySelector('.userInput');
+        // Determine the correct elements based on whether it's a form or the final integration section
+        let guidingQuestionDiv, optionsArea, responseArea, userInputField;
+
+        if (formElement.classList.contains('chatForm')) {
+            guidingQuestionDiv = formElement.querySelector('.guiding-question');
+            optionsArea = formElement.querySelector('.options-area');
+            responseArea = formElement.parentElement.querySelector('.response-area');
+            userInputField = formElement.querySelector('.userInput');
+        } else { // This is for the final integration section
+            guidingQuestionDiv = null; // No guiding question for final summary
+            optionsArea = null; // No options for final summary
+            responseArea = formElement.querySelector('#finalResponseArea'); // Directly target finalResponseArea
+            userInputField = null; // No user input for final summary
+        }
+
 
         if (data.type === 'question') {
-            guidingQuestionDiv.textContent = data.question;
-            optionsArea.innerHTML = ''; // Clear previous options
-            optionsArea.classList.remove('hidden-dynamic');
-            data.options.forEach(optionText => {
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.classList.add('option-button');
-                button.textContent = optionText;
-                button.addEventListener('click', () => {
-                    userInputField.value = optionText;
-                    formElement.requestSubmit(); // Programmatically submit the form
+            if (guidingQuestionDiv) guidingQuestionDiv.textContent = data.question;
+            if (optionsArea) {
+                optionsArea.innerHTML = ''; // Clear previous options
+                optionsArea.classList.remove('hidden-dynamic');
+                data.options.forEach(optionText => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.classList.add('option-button');
+                    button.textContent = optionText;
+                    button.addEventListener('click', () => {
+                        if (userInputField) userInputField.value = optionText;
+                        formElement.requestSubmit(); // Programmatically submit the form
+                    });
+                    optionsArea.appendChild(button);
                 });
-                optionsArea.appendChild(button);
-            });
-            responseArea.textContent = ''; // Clear previous summary
+            }
+            if (responseArea) responseArea.textContent = ''; // Clear previous summary
         } else if (data.type === 'summary_and_options') {
-            guidingQuestionDiv.textContent = data.follow_up_question;
-            responseArea.textContent = data.summary;
-            optionsArea.innerHTML = ''; // Clear previous options
-            optionsArea.classList.remove('hidden-dynamic');
-            data.new_options.forEach(optionText => {
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.classList.add('option-button');
-                button.textContent = optionText;
-                button.addEventListener('click', () => {
-                    userInputField.value = optionText;
-                    formElement.requestSubmit(); // Programmatically submit the form
+            if (guidingQuestionDiv) guidingQuestionDiv.textContent = data.follow_up_question;
+            if (responseArea) responseArea.textContent = data.summary;
+            if (optionsArea) {
+                optionsArea.innerHTML = ''; // Clear previous options
+                optionsArea.classList.remove('hidden-dynamic');
+                data.new_options.forEach(optionText => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.classList.add('option-button');
+                    button.textContent = optionText;
+                    button.addEventListener('click', () => {
+                        if (userInputField) userInputField.value = optionText;
+                        formElement.requestSubmit(); // Programmatically submit the form
+                    });
+                    optionsArea.appendChild(button);
                 });
-                optionsArea.appendChild(button);
-            });
-            userInputField.value = ''; // Clear input field after submission
+            }
+            if (userInputField) userInputField.value = ''; // Clear input field after submission
             currentSummaries[formElement.dataset.purpose] = data.summary; // Store summary
             updateProgressBar();
         } else if (data.type === 'summary_only') {
-            finalResponseArea.textContent = data.summary;
+            if (finalResponseArea) finalResponseArea.textContent = data.summary;
             // No options or guiding question for integrator
         } else if (data.type === 'error') {
-            responseArea.textContent = `Error: ${data.summary}`;
+            if (responseArea) responseArea.textContent = `Error: ${data.summary}`;
             console.error('API Error:', data.summary);
         }
     }
@@ -145,7 +161,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             const data = await response.json();
-            displayMessage(finalResponseArea.parentElement, data); // Pass the parent element of finalResponseArea
+            // Pass the integration-section element to displayMessage
+            displayMessage(document.getElementById('integration-section'), data);
 
         } catch (error) {
             console.error('Integration fetch error:', error);
@@ -155,6 +172,19 @@ document.addEventListener('DOMContentLoaded', function() {
             integrateBtn.innerHTML = '<i data-lucide="file-check-2"></i>Synthesize';
             lucide.createIcons();
         }
+    });
+
+    // Add event listeners for the next step arrows
+    nextStepArrows.forEach(arrow => {
+        arrow.addEventListener('click', () => {
+            const nextStepId = arrow.dataset.nextStep;
+            if (nextStepId) {
+                const nextElement = document.getElementById(nextStepId);
+                if (nextElement) {
+                    nextElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        });
     });
 
     // Initial progress bar update
