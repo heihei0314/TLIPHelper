@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'summary_only':                
                 responseAreaEl.innerHTML = data.summary.replace(/\n/g, '<br>');
                 responseAreaEl.classList.add('completed');
-                renderOptions(optionsAreaEl, data.new_options);
+                renderOptions(optionsAreaEl, data.suggested_questions);
                 userInputEl.value = ''; // Clear input for next refinement
                 userInputEl.focus();
                 break;

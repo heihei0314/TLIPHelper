@@ -65,8 +65,6 @@ def chat():
                 "objective": "", "outcomes": "", "pedagogy": "",
                 "development": "", "implementation": "", "evaluation": ""
             }
-
-        # Now, current_summary_array can be safely accessed
         current_summary_array = user_sessions[session_id]
 
         # Validate the purpose against the SYSTEM_PROMPTS keys

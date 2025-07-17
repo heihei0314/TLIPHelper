@@ -6,6 +6,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressText = document.getElementById('progressText');
     const nextStepArrows = document.querySelectorAll('.next-step-arrow'); // Select all next step arrows
 
+    // Define the base path for your TLIP Helper application
+    // This should match the ProxyPass path in your Apache configuration
+    const BASE_PATH = '/tlip-helper';
+
+    // Map step names to their corresponding container IDs for scrolling
+    const stepNameToIdMap = {
+        "objective": "outcomes-container",
+        "outcomes": "pedagogy-container",
+        "pedagogy": "development-container",
+        "development": "implementation-container",
+        "implementation": "evaluation-container",
+        "evaluation": "integration-section" // Last step leads to integration
+    };
+
+    const stepToDisplayNameMap = {
+        "objective": "Learning Outcomes",
+        "outcomes": "Pedagogy & Technology",
+        "pedagogy": "Plan Development",
+        "development": "Plan Implementation",
+        "implementation": "Plan Evaluation",
+        "evaluation": "Synthesize Proposal"
+    };
+
+
     // Store the current summaries for each purpose
     // This will be sent with each request to the backend to maintain context
     let currentSummaries = {
@@ -68,7 +92,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (optionsArea) {
                 optionsArea.innerHTML = ''; // Clear previous options
                 optionsArea.classList.remove('hidden-dynamic');
-                data.new_options.forEach(optionText => {
+
+                // Add AI-generated suggested questions
+                data.suggested_questions.forEach(optionText => {
                     const button = document.createElement('button');
                     button.type = 'button';
                     button.classList.add('option-button');
@@ -79,6 +105,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                     optionsArea.appendChild(button);
                 });
+
+                // Add the hardcoded "Move to [Next Step]" option
+                const currentPurpose = formElement.dataset.purpose;
+                const nextContainerId = stepNameToIdMap[currentPurpose];
+                const nextStepDisplayName = stepToDisplayNameMap[currentPurpose];
+
+                if (nextContainerId && nextStepDisplayName) {
+                    const moveToButton = document.createElement('button');
+                    moveToButton.type = 'button';
+                    moveToButton.classList.add('option-button', 'move-to-option'); // Add a class for styling
+                    moveToButton.textContent = `Move to ${nextStepDisplayName}`;
+                    moveToButton.addEventListener('click', () => {
+                        const nextElement = document.getElementById(nextContainerId);
+                        if (nextElement) {
+                            nextElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    });
+                    optionsArea.appendChild(moveToButton);
+                }
             }
             if (userInputField) userInputField.value = ''; // Clear input field after submission
             currentSummaries[formElement.dataset.purpose] = data.summary; // Store summary
@@ -105,7 +150,8 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; // Show loading spinner
 
         try {
-            const response = await fetch('/api/chat', { // New Flask endpoint
+            // Prepend BASE_PATH to the API endpoint
+            const response = await fetch(`${BASE_PATH}/api/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -149,7 +195,8 @@ document.addEventListener('DOMContentLoaded', function() {
         integrateBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Synthesizing...';
 
         try {
-            const response = await fetch('/api/chat', {
+            // Prepend BASE_PATH to the API endpoint
+            const response = await fetch(`${BASE_PATH}/api/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -174,7 +221,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Add event listeners for the next step arrows
+    // Add event listeners for the next step arrows (these are separate from options)
+    // These are the arrows at the bottom-right of each container, not the new "Move to" buttons
     nextStepArrows.forEach(arrow => {
         arrow.addEventListener('click', () => {
             const nextStepId = arrow.dataset.nextStep;

@@ -81,8 +81,8 @@ def get_openai_reply(user_input, purpose, current_summary_array):
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_input}
             ],
-            max_tokens=700,
-            temperature=0.6,
+            max_tokens=1000,
+            temperature=0.5,
         )
         ai_response_str = completion.choices[0].message.content
 
@@ -96,9 +96,10 @@ def get_openai_reply(user_input, purpose, current_summary_array):
             ai_response_json = json.loads(ai_response_str)
             response_data = {
                 "type": "summary_and_options",
+                "explanation": ai_response_json.get("explanation", "AI did not provide an explanation."),
                 "follow_up_question": ai_response_json.get("follow_up_question", "AI did not provide a follow-up question."),
                 "summary": ai_response_json.get("summary", "AI did not provide a summary."),
-                "new_options": ai_response_json.get("new_options", [])
+                "suggested_questions": ai_response_json.get("suggested_questions", [])
             }
             current_summary_array[purpose] = ai_response_json.get("summary", "")
 

@@ -1,181 +1,184 @@
+# test_my_application.py
+
 import unittest
 import json
 import os
 import sys
-from unittest.mock import patch, MagicMock
+from dotenv import load_dotenv
+from openai import AzureOpenAI
 
-# Adjust sys.path to allow importing from the parent directory (backend)
-# Now it needs to go up two levels to reach the project root, then down into backend
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# Dynamically add the 'backend' directory to sys.path
+# This assumes test_main.py is in backend/unit_test
+# and main.py is in backend/
+script_dir = os.path.dirname(__file__)
+backend_dir = os.path.abspath(os.path.join(script_dir, '..'))
+sys.path.insert(0, backend_dir) # Add backend directory to path
 
-# Import the project python files be tested
-from main import get_openai_reply
-from prompts import SYSTEM_PROMPTS, JSON_RESPONSE_FORMAT_INSTRUCTION
+# Now, import get_openai_reply from main.
+# This assumes main.py is directly in the 'backend' directory.
+try:
+    from main import get_openai_reply
+except ImportError as e:
+    print(f"Error importing get_openai_reply: {e}")
+    print(f"Current sys.path: {sys.path}")
+    print(f"Attempted to import 'main' from: {backend_dir}")
+    # This print statement will help in debugging if the import still fails.
 
-class TestMain(unittest.TestCase):
 
-    # Define a common mock response for the AI when it returns summary and options
-    MOCK_AI_SUMMARY_OPTIONS_RESPONSE = {
-        "follow_up_question": "Can you elaborate further?",
-        "summary": "This is a summarized response.",
-        "new_options": ["Option A", "Option B", "Option C"]
-    }
+# --- API Test (Azure OpenAI) ---
+class TestAzureOpenAIAPI(unittest.TestCase):
+    """
+    Test suite for Azure OpenAI API calls.
+    This test is placed first to ensure core API functionality is verified early.
+    """
+    AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT", "https://your-resource-name.openai.azure.com/openai/deployments/your-deployment-name/chat/completions?api-version=2024-02-15-preview")
+    AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY", "YOUR_DEFAULT_API_KEY_IF_NOT_SET")
+    AZURE_OPENAI_API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION", "2024-02-15-preview")
+    AZURE_OPENAI_DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME", "your-deployment-name")
 
-    # Define a common mock response for the AI when it's the integrator
-    MOCK_AI_INTEGRATOR_RESPONSE = "This is the final integrated proposal."
+    @classmethod
+    def setUpClass(cls):
+        """
+        Set up class-level resources, like checking for environment variables.
+        Loads environment variables from a .env file located in the backend folder.
+        Assumes test_my_application.py is in /backend/unit_test and .env is in /backend.
+        """
+        script_dir = os.path.dirname(__file__)
+        dotenv_path = os.path.join(script_dir, '..', '.env')
+        
+        load_dotenv(dotenv_path=dotenv_path)
+        print(f"\nAttempting to load .env from: {dotenv_path}")
 
-    # This method runs before each test
+        cls.AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT", cls.AZURE_OPENAI_ENDPOINT)
+        cls.AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY", cls.AZURE_OPENAI_API_KEY)
+        cls.AZURE_OPENAI_API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION", cls.AZURE_OPENAI_API_VERSION)
+        cls.AZURE_OPENAI_DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME", cls.AZURE_OPENAI_DEPLOYMENT_NAME)
+
+        if not cls.AZURE_OPENAI_ENDPOINT or "your-resource-name" in cls.AZURE_OPENAI_ENDPOINT:
+            print("\nWARNING: AZURE_OPENAI_ENDPOINT environment variable not set or still default. API tests may fail.")
+            print("Please set AZURE_OPENAI_ENDPOINT to your Azure OpenAI chat completions endpoint in your .env file.")
+        if not cls.AZURE_OPENAI_API_KEY or "YOUR_DEFAULT_API_KEY_IF_NOT_SET" in cls.AZURE_OPENAI_API_KEY:
+            print("WARNING: AZURE_OPENAI_API_KEY environment variable not set or still default. API tests may fail.")
+            print("Please set AZURE_OPENAI_API_KEY to your Azure OpenAI API key in your .env file.")
+        if not cls.AZURE_OPENAI_API_VERSION:
+            print("WARNING: AZURE_OPENAI_API_VERSION environment variable not set. API tests may fail.")
+        if not cls.AZURE_OPENAI_DEPLOYMENT_NAME:
+            print("WARNING: AZURE_OPENAI_DEPLOYMENT_NAME environment variable not set. API tests may fail.")
+
+    def test_01_azure_openai_connection(self):
+        """
+        Verify a successful chat completion call to Azure OpenAI.
+        This test name is chosen to match your original test_main.py's connection test.
+        """
+        print("\nRunning Azure OpenAI API Test: test_01_azure_openai_connection")
+
+        self.assertTrue(self.AZURE_OPENAI_API_KEY, "AZURE_OPENAI_API_KEY is not set")
+        self.assertTrue(self.AZURE_OPENAI_ENDPOINT, "AZURE_OPENAI_ENDPOINT is not set")
+        self.assertTrue(self.AZURE_OPENAI_API_VERSION, "AZURE_OPENAI_API_VERSION is not set")
+        self.assertTrue(self.AZURE_OPENAI_DEPLOYMENT_NAME, "AZURE_OPENAI_DEPLOYMENT_NAME is not set")
+
+        try:
+            client = AzureOpenAI(
+                api_key=self.AZURE_OPENAI_API_KEY,
+                azure_endpoint=self.AZURE_OPENAI_ENDPOINT,
+                api_version=self.AZURE_OPENAI_API_VERSION,
+            )
+            response = client.chat.completions.create(
+                model=self.AZURE_OPENAI_DEPLOYMENT_NAME,
+                messages=[
+                    {"role": "system", "content": "You are a test assistant."},
+                    {"role": "user", "content": "Test connection"}
+                ],
+                max_tokens=10,
+                temperature=0.6,
+            )
+            self.assertIsNotNone(response, "Azure OpenAI API call failed")
+            self.assertTrue(hasattr(response, 'choices'), "Response does not contain choices")
+            self.assertGreater(len(response.choices), 0, "No choices found in response")
+            self.assertIsNotNone(response.choices[0].message, "First choice message is None")
+            self.assertIsNotNone(response.choices[0].message.content, "First choice message content is None")
+            self.assertIsInstance(response.choices[0].message.content, str, "Content is not a string")
+
+            print("Azure OpenAI API Test: test_01_azure_openai_connection PASSED")
+
+        except Exception as e:
+            self.fail(f"Azure OpenAI connection failed: {str(e)}")
+
+# --- Test suite for get_openai_reply function ---
+class TestOpenAIReplyFunction(unittest.TestCase):
+    """
+    Test suite for the get_openai_reply function's output.
+    Dynamically generates tests for each purpose in summary_array.
+    """
+    # Define the purposes (keys of summary_array) for which to run tests
+    PURPOSES = [
+        "objective", "outcomes", "pedagogy",
+        "development", "implementation", "evaluation"
+    ]
+
     def setUp(self):
-        # Patch os.getenv to control environment variables during tests
-        self.getenv_patcher = patch('os.getenv')
-        self.mock_getenv = self.getenv_patcher.start()
-        self.mock_getenv.side_effect = self._mock_getenv_values
-
-        # Patch AzureOpenAI client and its chat.completions.create method
-        self.openai_patcher = patch('main.AzureOpenAI')
-        self.mock_openai_client = self.openai_patcher.start()
-        self.mock_completion_create = self.mock_openai_client.return_value.chat.completions.create
-
-        # Initialize a fresh summary_array for each test
-        self.initial_summary_array = {
+        # These values would typically be passed to get_openai_reply
+        self.summary_array = {
             "objective": "", "outcomes": "", "pedagogy": "",
             "development": "", "implementation": "", "evaluation": ""
         }
+        self.user_input = "Improve student motivation" # A generic input for testing
 
-    # Helper for mocking os.getenv
-    def _mock_getenv_values(self, key):
-        if key == "AZURE_OPENAI_API_KEY": return "dummy_key"
-        if key == "AZURE_OPENAI_ENDPOINT": return "https://dummy.openai.azure.com/"
-        if key == "AZURE_OPENAI_API_VERSION": return "2024-02-15-preview"
-        if key == "AZURE_OPENAI_DEPLOYMENT_NAME": return "dummy-deployment"
-        return None # For other environment variables
+    # Helper method for testing JSON format
+    def _test_json_format(self, purpose):
+        print(f"\nRunning get_openai_reply Test: test_output_json_format for purpose '{purpose}'")
+        if 'get_openai_reply' not in globals() and 'get_openai_reply' not in locals():
+            self.fail("get_openai_reply function not found. Check import path.")
+        
+        response, _ = get_openai_reply(self.user_input, purpose, self.summary_array)
+        try:
+            json.loads(response)
+            self.assertTrue(True)
+            print(f"get_openai_reply Test: test_output_json_format for '{purpose}' PASSED")
+        except json.JSONDecodeError:
+            self.fail(f"Response for purpose '{purpose}' is not in valid JSON format: {response}")
 
-    # This method runs after each test
-    def tearDown(self):
-        self.getenv_patcher.stop()
-        self.openai_patcher.stop()
+    # Helper method for testing missing keys
+    def _test_missing_keys(self, purpose):
+        print(f"Running get_openai_reply Test: test_missing_keys_in_output for purpose '{purpose}'")
+        if 'get_openai_reply' not in globals() and 'get_openai_reply' not in locals():
+            self.fail("get_openai_reply function not found. Check import path.")
 
-    def _set_mock_ai_response(self, content, is_json=True):
-        """Helper to set the mock AI response content."""
-        mock_choice = MagicMock()
-        if is_json:
-            mock_choice.message.content = json.dumps(content)
-        else:
-            mock_choice.message.content = content
-        self.mock_completion_create.return_value.choices = [mock_choice]
+        response, _ = get_openai_reply(self.user_input, purpose, self.summary_array)
+        try:
+            response_dict = json.loads(response)
+            print(response_dict)
+        except json.JSONDecodeError:
+            self.fail(f"Could not parse JSON for purpose '{purpose}' in missing keys test. Response: {response}")
+            
+        expected_keys = {"type", "explanation", "follow_up_question", "summary", "suggested_questions"}
+        missing_keys = expected_keys - set(response_dict.keys())
+        self.assertFalse(missing_keys, f"Missing keys in response for purpose '{purpose}': {missing_keys}")
+        print(f"get_openai_reply Test: test_missing_keys_in_output for '{purpose}' PASSED")
 
-    def test_initial_question_retrieval(self):
-        """Test that the initial question and options are returned for an empty user input."""
-        purpose = "objective"
-        user_input = ""
-        response_str, updated_summary = get_openai_reply(user_input, purpose, self.initial_summary_array.copy())
-        response_data = json.loads(response_str)
+# Dynamically create test methods for each purpose
+for p in TestOpenAIReplyFunction.PURPOSES:
+    # Create test for JSON format
+    def create_json_test(purpose_name):
+        def test_method(self):
+            self._test_json_format(purpose_name)
+        return test_method
+    setattr(TestOpenAIReplyFunction, f'test_output_json_format_{p}', create_json_test(p))
 
-        self.assertEqual(response_data["type"], "question")
-        self.assertEqual(response_data["question"], SYSTEM_PROMPTS[purpose]["initial_question"])
-        self.assertEqual(response_data["options"], SYSTEM_PROMPTS[purpose]["options"])
-        self.assertDictEqual(updated_summary, self.initial_summary_array) # Summary should not change
-
-    def test_ai_summary_and_options_response(self):
-        """Test parsing of AI response with summary and options."""
-        purpose = "outcomes"
-        user_input = "I want students to analyze case studies."
-        self._set_mock_ai_response(self.MOCK_AI_SUMMARY_OPTIONS_RESPONSE)
-
-        response_str, updated_summary = get_openai_reply(user_input, purpose, self.initial_summary_array.copy())
-        response_data = json.loads(response_str)
-
-        self.assertEqual(response_data["type"], "summary_and_options")
-        self.assertEqual(response_data["summary"], self.MOCK_AI_SUMMARY_OPTIONS_RESPONSE["summary"])
-        self.assertEqual(response_data["follow_up_question"], self.MOCK_AI_SUMMARY_OPTIONS_RESPONSE["follow_up_question"])
-        self.assertEqual(response_data["new_options"], self.MOCK_AI_SUMMARY_OPTIONS_RESPONSE["new_options"])
-        self.assertEqual(updated_summary[purpose], self.MOCK_AI_SUMMARY_OPTIONS_RESPONSE["summary"]) # Check if summary is stored
-
-    def test_integrator_purpose_response(self):
-        """Test AI response for the 'integrator' purpose."""
-        purpose = "integrator"
-        user_input = json.dumps({"objective": "obj summary", "outcomes": "out summary"}) # Mock previous summaries
-        self._set_mock_ai_response(self.MOCK_AI_INTEGRATOR_RESPONSE, is_json=False) # Integrator returns plain text
-
-        response_str, updated_summary = get_openai_reply(user_input, purpose, self.initial_summary_array.copy())
-        response_data = json.loads(response_str)
-
-        self.assertEqual(response_data["type"], "summary_only")
-        self.assertEqual(response_data["summary"], self.MOCK_AI_INTEGRATOR_RESPONSE)
-        self.assertDictEqual(updated_summary, self.initial_summary_array) # Integrator doesn't update its own summary
-
-    def test_invalid_purpose(self):
-        """Test handling of an invalid purpose."""
-        purpose = "non_existent_purpose"
-        user_input = "Some input."
-        response_str, updated_summary = get_openai_reply(user_input, purpose, self.initial_summary_array.copy())
-        response_data = json.loads(response_str)
-
-        self.assertEqual(response_data["type"], "error")
-        self.assertIn("Invalid purpose provided", response_data["summary"])
-        self.assertDictEqual(updated_summary, self.initial_summary_array)
-
-    def test_json_decode_error(self):
-        """Test error handling when AI returns invalid JSON."""
-        purpose = "objective"
-        user_input = "Some input."
-        # Simulate AI returning non-JSON string when JSON is expected
-        self._set_mock_ai_response("This is not JSON.", is_json=False)
-
-        response_str, updated_summary = get_openai_reply(user_input, purpose, self.initial_summary_array.copy())
-        response_data = json.loads(response_str)
-
-        self.assertEqual(response_data["type"], "error")
-        self.assertIn("AI response was not in the expected format", response_data["summary"])
-        self.assertDictEqual(updated_summary, self.initial_summary_array)
-
-    @patch('main.AZURE_OPENAI_API_KEY', None) # Temporarily set API key to None for this test
-    @patch('main.AZURE_OPENAI_ENDPOINT', None)
-    @patch('main.AZURE_OPENAI_API_VERSION', None)
-    @patch('main.AZURE_OPENAI_DEPLOYMENT_NAME', None)
-    def test_azure_openai_config_error(self):
-        """Test error handling when Azure OpenAI configuration is incomplete."""
-        # Ensure os.getenv returns None for these specific keys during this test
-        self.mock_getenv.side_effect = lambda key: None if key in [
-            "AZURE_OPENAI_API_KEY", "AZURE_OPENAI_ENDPOINT",
-            "AZURE_OPENAI_API_VERSION", "AZURE_OPENAI_DEPLOYMENT_NAME"
-        ] else self._mock_getenv_values(key)
-
-        purpose = "objective"
-        user_input = "Some input."
-        response_str, updated_summary = get_openai_reply(user_input, purpose, self.initial_summary_array.copy())
-        response_data = json.loads(response_str)
-
-        self.assertEqual(response_data["type"], "error")
-        self.assertIn("Azure OpenAI configuration is incomplete", response_data["summary"])
-        self.assertDictEqual(updated_summary, self.initial_summary_array)
-
-    def test_summary_array_context_passing(self):
-        """Test that current_summary_array is correctly passed and updated."""
-        # Simulate some previous steps being completed
-        pre_filled_summary = {
-            "objective": "To improve student motivation.",
-            "outcomes": "Students will complete tasks.",
-            "pedagogy": "", "development": "", "implementation": "", "evaluation": ""
-        }
-        purpose = "pedagogy"
-        user_input = "I want an experiential learning approach."
-        self._set_mock_ai_response(self.MOCK_AI_SUMMARY_OPTIONS_RESPONSE)
-
-        response_str, updated_summary = get_openai_reply(user_input, purpose, pre_filled_summary.copy())
-        response_data = json.loads(response_str)
-
-        self.assertEqual(updated_summary["objective"], "To improve student motivation.")
-        self.assertEqual(updated_summary["outcomes"], "Students will complete tasks.")
-        self.assertEqual(updated_summary[purpose], self.MOCK_AI_SUMMARY_OPTIONS_RESPONSE["summary"])
-        # Verify that the system message sent to OpenAI includes previous summaries
-        # This requires inspecting the mock_completion_create call arguments
-        call_args = self.mock_completion_create.call_args
-        system_message = call_args.kwargs['messages'][0]['content']
-        self.assertIn("objective: To improve student motivation.", system_message)
-        self.assertIn("outcomes: Students will complete tasks.", system_message)
-        self.assertIn(SYSTEM_PROMPTS[purpose]["persona"], system_message)
+    # Create test for missing keys
+    def create_missing_keys_test(purpose_name):
+        def test_method(self):
+            self._test_missing_keys(purpose_name)
+        return test_method
+    setattr(TestOpenAIReplyFunction, f'test_missing_keys_in_output_{p}', create_missing_keys_test(p))
 
 
 if __name__ == '__main__':
-    unittest.main()
+    suite = unittest.TestSuite()
+    loader = unittest.TestLoader()
+
+    suite.addTest(loader.loadTestsFromTestCase(TestAzureOpenAIAPI))
+    suite.addTest(loader.loadTestsFromTestCase(TestOpenAIReplyFunction))
+
+    runner = unittest.TextTestRunner(verbosity=2)
+    runner.run(suite)

@@ -9,7 +9,7 @@ JSON_RESPONSE_FORMAT_INSTRUCTION = (
     "Your response MUST be a valid JSON object. It must have three keys: "
     "'follow_up_question' (a string containing follow-up question based on your persona), "
     "'summary' (a string containing your summarized response based on your persona. Your summary must only include the result/decisions discussed, not the conversation history.) and "
-    "'new_options' (an array of 3-4 distinct, concise string options that the user could "
+    "'suggested_questions' (an array of 3-4 distinct, concise string options that the user could "
     "choose to further refine or challenge your summary)."
 )
 
@@ -29,7 +29,7 @@ SYSTEM_PROMPTS = {
             "The project team, given three proposed solutions, will evaluate them using a decision matrix and recommend the best option.",
             "The trainee, following a procedure, will be able to demonstrate a specific skill within a set timeframe and without errors."
         ],
-        "persona": "You are an instructional designer. The user has described a desired behavior. Convert this into a formal learning outcome summary using the ABCD model (Audience, Behavior, Condition, Degree) as a framework for your summary. The new_options must following the ABCD model. Ask a follow-up question to help the user refine their outcomes. If user already have a solid intented learning outcomes, ask if he/she has any other learning outcomes. If they don't have any other, you should encourage them to move on the next step (another chatbot), which find the pedagogy or technology to use."
+        "persona": "You are an instructional designer. The user has described a desired behavior. Convert this into a formal learning outcome summary using the ABCD model (Audience, Behavior, Condition, Degree) as a framework for your summary. The suggested_questions must following the ABCD model. Ask a follow-up question to help the user refine their outcomes. If user already have a solid intented learning outcomes, ask if he/she has any other learning outcomes. If they don't have any other, you should encourage them to move on the next step (another chatbot), which find the pedagogy or technology to use."
         f"{JSON_RESPONSE_FORMAT_INSTRUCTION}"
     },
     "pedagogy": {
@@ -138,7 +138,7 @@ def get_openai_reply(user_input, purpose):
                 "type": "summary_and_options", # Match JS expectation
                 "follow_up_question": ai_response_json.get("follow_up_question", "AI did not provide a follow-up question."),
                 "summary": ai_response_json.get("summary", "AI did not provide a summary."),
-                "new_options": ai_response_json.get("new_options", [])
+                "suggested_questions": ai_response_json.get("suggested_questions", [])
             }
             summary_array[purpose] = ai_response_json.get("summary", "")
 

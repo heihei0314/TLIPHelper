@@ -3,10 +3,10 @@
 # The persona now explicitly instructs the AI to return a JSON object with a summary AND new options.
 JSON_RESPONSE_FORMAT_INSTRUCTION = (
     "Your response MUST be a valid JSON object. It must have three keys: "
+    "'explanation' (a string explaining the concept with a real-life example), "
     "'follow_up_question' (a string containing follow-up question based on your persona), "
     "'summary' (a string containing your summarized response based on your persona. Your summary must only include the result/decisions discussed, not the conversation history.) and "
-    "'new_options' (an array of 3-4 distinct, concise string options that the user could "
-    "choose to further refine or challenge your summary)."
+    "'suggested_questions' (an array of 2-3 distinct, concise string options that the user could choose to further refine the summary or ask for more explanation)."
 )
 
 # Each prompt is now a dictionary containing the initial question/options and the persona for summarizing.
@@ -25,7 +25,7 @@ SYSTEM_PROMPTS = {
             "The project team, given three proposed solutions, will evaluate them using a decision matrix and recommend the best option.",
             "The trainee, following a procedure, will be able to demonstrate a specific skill within a set timeframe and without errors."
         ],
-        "persona": "You are an instructional designer. The user has described a desired behavior. Convert this into a formal learning outcome summary using the ABCD model (Audience, Behavior, Condition, Degree) as a framework for your summary. The new_options must following the ABCD model. Ask a follow-up question to help the user refine their outcomes. If user already have a solid intented learning outcomes, ask if he/she has any other learning outcomes. If they don't have any other, you should encourage them to move on the next step (another chatbot), which find the pedagogy or technology to use."
+        "persona": "You are an instructional designer. The user has described a desired behavior. Convert this into a formal learning outcome summary using the ABCD model (Audience, Behavior, Condition, Degree) as a framework for your summary. The suggested_questions must following the ABCD model. Ask a follow-up question to help the user refine their outcomes. If user already have a solid intented learning outcomes, ask if he/she has any other learning outcomes. If they don't have any other, you should encourage them to move on the next step (another chatbot), which find the pedagogy or technology to use."
         f"{JSON_RESPONSE_FORMAT_INSTRUCTION}"
     },
     "pedagogy": {

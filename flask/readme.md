@@ -56,6 +56,7 @@ pip install -r /flask/requirements.txt
     .
     ├── backend/
     │   ├── __init__.py  
+    │   ├── .env 
     │   ├── app.py
     │   ├── main.py
     │   ├── prompts.py
@@ -63,6 +64,7 @@ pip install -r /flask/requirements.txt
     │   └── unit_test/
     │       └── __init__.py  
     │       └── test_main.py
+    │       └── test_integration.py
     └── static/
         ├── index.html
         ├── css/
@@ -128,11 +130,32 @@ To run the unit tests for the backend logic:
 6.  Continue through each step (Objective, Outcomes, Pedagogy, Development, Implementation, Evaluation).
 7.  Once you have completed all steps, click the "Synthesize" button in the "Final Step!" section to generate a comprehensive project proposal based on all your inputs.
 
+Testing
+This section describes the testing strategy and the purpose of the main test files.
+
+test_main.py (Unit and API Tests)
+This file contains a comprehensive suite of tests for the backend application. It includes:
+
+Azure OpenAI API Connection Test: This is the primary test that runs first to ensure a stable connection and expected response from the configured Azure OpenAI endpoint. It verifies the API key, endpoint, API version, and deployment name are correctly loaded and that a basic chat completion call succeeds.
+
+get_openai_reply Function Tests: These tests focus on the output of the get_openai_reply function (presumably from main.py). They validate that the function's response is in a valid JSON format and that it contains all the expected keys (type, explanation, follow_up_question, summary, suggested_questions).
+
+General Unit Tests: Includes basic unit tests for individual functions within the application, ensuring their core logic works as expected.
+
+test_integration.py (Integration Tests)
+This file (or section, if integrated into test_main.py as in the provided example) contains tests that verify the interaction between different components or services of the application. These tests are designed to ensure that various parts of the system work correctly together. Examples include:
+
+Simulating user creation and login flows to ensure authentication and user management systems are integrated properly.
+
+Testing data flow between the application and external databases or third-party services.
+
 ## Future Improvements
 **imporve the prompts**
 **imporve the UI**
 **Add a agent to judge**
 **Add a agent to identify the finishing line for each step**
+
+
 
 ## License
 

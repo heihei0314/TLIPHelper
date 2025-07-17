@@ -11,7 +11,7 @@
 }
 html {
     /* Add scroll-padding-top to account for the fixed header */
-    scroll-padding-top: 10em; /* Adjust this value if fixed header changes height */
+    scroll-padding-top: 12em; /* Adjust this value if fixed header changes height */
 }
 
 body { 
@@ -73,7 +73,7 @@ body {
 /* --- Main Layout --- */
 .main-content {
     margin: 0em auto;
-    padding: 10em 1rem;
+    padding: 12em 1rem;
 }
 
 
