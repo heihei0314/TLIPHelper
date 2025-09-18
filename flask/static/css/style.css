@@ -21,6 +21,111 @@ body {
     margin: 0; 
 }
 
+/* --- Consent Modal Styles --- */
+
+.modal {
+    position: fixed;
+    z-index: 2000; /* Use a high z-index to ensure it's on top of all other content */
+    left: 0;
+    top: 0;
+    padding-top: 50px;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6); /* Semi-transparent background */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    visibility: visible; 
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+.modal-content {
+    background-color: var(--container-background);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    width: 90%;
+    max-width: 700px;
+    text-align: center;
+    position: relative;
+    transform: translateY(-20px);
+    transition: transform 0.4s ease-out;
+}
+
+.modal.show .modal-content {
+    transform: translateY(0);
+}
+
+.modal-header h2 {
+    color: var(--primary-color);
+    margin-top: 0;
+    font-size: 1.8rem;
+}
+
+.modal-body p {
+    font-size: 1rem;
+    line-height: 1.6;
+    text-align: left;
+}
+.modal-body ul {
+    text-align:left;
+    line-height: 1.6;
+}
+.consent-checkbox-container {
+    margin: 20px 0;
+    color: var(--light-text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.consent-checkbox-container input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.consent-checkbox-container label {
+    color: var(--text-color);
+    font-size: 0.95rem;
+    user-select: none;
+}
+
+.consent-btn {
+    padding: 12px 24px;
+    font-size: 1rem;
+    border-radius: 25px;
+    border: none;
+    background-color: var(--primary-color);
+    color: white;
+    cursor: not-allowed;
+    opacity: 0.5;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+
+.consent-btn.enabled {
+    background-color: var(--success-color);
+    cursor: pointer;
+    opacity: 1;
+}
+
+.consent-btn.enabled:hover {
+    background-color: #218838;
+}
+
+/* Initially hide the main app content */
+.main-content-wrapper {
+    display: none;
+}
+
 /* --- Progress Bar Styles --- */
 #progressBarContainer {
     position: fixed; /* This fixes the element to the browser window */
@@ -144,7 +249,7 @@ body {
 
     margin: 0; 
     font-size: 1.05rem;
-    font-weight: 500;
+    font-weight: 400;
     color: var(--text-color);
     line-height: 1.5;
     position: relative; /* Needed for positioning pseudo-elements if you use them */

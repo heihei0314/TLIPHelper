@@ -65,6 +65,8 @@ def chat():
                 "objective": "", "outcomes": "", "pedagogy": "",
                 "development": "", "implementation": "", "evaluation": ""
             }
+        
+        # Now, current_summary_array can be safely accessed
         current_summary_array = user_sessions[session_id]
 
         # Validate the purpose against the SYSTEM_PROMPTS keys
@@ -73,12 +75,14 @@ def chat():
 
         # Call the get_openai_reply function from main.py
         response_data_str, updated_summary_array = get_openai_reply(user_input, purpose, current_summary_array)
-
+        response_json_from_main = json.loads(response_data_str)
+        
         # Update the session's summary array
         user_sessions[session_id] = updated_summary_array
-
+        response_json_from_main['full_summary_state'] = user_sessions[session_id]
+        
         # Parse the JSON string from main.py and return as Flask JSON response
-        return jsonify(json.loads(response_data_str)), 200
+        return jsonify(response_json_from_main), 200
 
     except json.JSONDecodeError:
         return jsonify({"type": "error", "summary": "Invalid JSON in request body."}), 400

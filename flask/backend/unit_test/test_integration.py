@@ -90,12 +90,12 @@ def run_main_with_simulated_inputs():
                 try:
                     response_data = json.loads(response_json_str)
                     if "summary" in response_data:
-                        current_summary_array[purpose] = response_data["summary"]
+                        current_summary_array[purpose] = updated_summary_array[purpose]
                 except json.JSONDecodeError:
                     print(f"Warning: Could not decode JSON response for {purpose}: {response_json_str}")
 
                 print(f"Response from main.py (JSON):\n{response_json_str}")
-                print(f"Updated Summary Array:\n{json.dumps(updated_summary_array, indent=2)}")
+                print(f"Updated Summary Array:\n{json.dumps(current_summary_array[purpose], indent=2)}")
                 print("-" * 70)
 
             except Exception as e:

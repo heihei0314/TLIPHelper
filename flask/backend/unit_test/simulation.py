@@ -82,26 +82,34 @@ def generate_mock_user_inputs():
     an AI generating questions/statements from a specific persona.
     The output for each purpose is a list of 3 questions/statements.
     """
-    PURPOSES = [
-        "objective", "outcomes", "pedagogy",
-        "development", "implementation", "evaluation"
+    #PURPOSES = [
+    #    "objective", "outcomes", "pedagogy", "development", "implementation", "evaluation"
+    #]
+    PURPOSES = [        
+        "development"
     ]
-
     # Background persona for the AI generating user inputs
     background_persona = (
         "You are a faculty in HKUST, teaching math courses. "
         "You are applying for an education innovation project, but you know nothing "
         "in teaching and learning, and edTech. Ultimately you would like to adopt VR in your math course. "
-        "Generate a short,concise, 3 questions or statements that you, as this faculty, "
-        "would ask or say to initiate discussion for the following project step. "
-        "Focus on your limited knowledge in edTech and T&L, and your desire for VR. You must not mentioned you limited knowledge in edTech and T&L, and your desire for VR."
+        "Generate 5 sentences (3 questions and 2 decisions) that you, as this faculty, would ask or say to initiate discussion for the following project step."
+        "Keep the 5 generated sentece short and concise." 
+        "Focus on your limited knowledge in edTech and T&L, and your desire for VR. You must not mentioned your limited knowledge in edTech and T&L."
         "Return the questions as a JSON array of strings."
+        "Steps (purpose):"
+        "objective - Project Ojectives"
+        "outcomes - intented learning outcomes, you don't have a course in mind, until the you are told to do so."
+        "pedagogy - the teaching method"
+        "development - frequent questions of development plan"
+        "implementation - how to adopt in the class"
+        "evaluation - evaluation plans"      
     )
 
     generated_user_inputs = {}
 
     for purpose in PURPOSES:
-        user_query_for_ai = f"Generate 3 user inputs for the '{purpose}' step based on the persona."
+        user_query_for_ai = f"Generate 5 user inputs for the purpose: '{purpose}' based on the persona. You must not generate other purposes. Your response MUST be a valid Array object."
 
         # simulate_openai_chat_completion already returns a parsed list
         simulated_input_list = simulate_openai_chat_completion(

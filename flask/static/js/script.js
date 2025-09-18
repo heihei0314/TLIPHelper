@@ -7,8 +7,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const nextStepArrows = document.querySelectorAll('.next-step-arrow'); // Select all next step arrows
 
     // Define the base path for your TLIP Helper application
+    // debug mode
+    const BASE_PATH = 'http://127.0.0.1:8002';
     // This should match the ProxyPass path in your Apache configuration
-    const BASE_PATH = '/tlip-helper';
+    //const BASE_PATH = '/tlip-helper';
+    
 
     // Map step names to their corresponding container IDs for scrolling
     const stepNameToIdMap = {
@@ -41,9 +44,18 @@ document.addEventListener('DOMContentLoaded', function() {
         "evaluation": ""
     };
 
+    let completedStatus = {
+        "objective": 0,
+        "outcomes": 0,
+        "pedagogy": 0,
+        "development": 0,
+        "implementation": 0,
+        "evaluation": 0
+    };
+
     // Function to update progress bar
     function updateProgressBar() {
-        const completedSteps = Object.values(currentSummaries).filter(summary => summary !== "").length;
+        completedSteps = Object.values(completedStatus).filter(status => status !== 0).length;
         const totalSteps = Object.keys(currentSummaries).length;
         const progress = (completedSteps / totalSteps) * 100;
         progressBar.style.width = `${progress}%`;
@@ -52,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to display messages (guiding question or summary)
     function displayMessage(formElement, data) {
-        // Determine the correct elements based on whether it's a form or the final integration section
+		// Determine the correct elements based on whether it's a form or the final integration section
         let guidingQuestionDiv, optionsArea, responseArea, userInputField;
 
         if (formElement.classList.contains('chatForm')) {
@@ -73,28 +85,44 @@ document.addEventListener('DOMContentLoaded', function() {
             if (optionsArea) {
                 optionsArea.innerHTML = ''; // Clear previous options
                 optionsArea.classList.remove('hidden-dynamic');
-                data.options.forEach(optionText => {
-                    const button = document.createElement('button');
-                    button.type = 'button';
-                    button.classList.add('option-button');
-                    button.textContent = optionText;
-                    button.addEventListener('click', () => {
-                        if (userInputField) userInputField.value = optionText;
-                        formElement.requestSubmit(); // Programmatically submit the form
-                    });
-                    optionsArea.appendChild(button);
-                });
+				
+				if (Array.isArray(data.options)) { //
+					data.options.forEach(optionText => {
+						const button = document.createElement('button');
+						button.type = 'button';
+						button.classList.add('option-button');
+						button.textContent = optionText;
+						button.addEventListener('click', () => {
+							if (userInputField) userInputField.value = optionText;
+							formElement.requestSubmit(); // Programmatically submit the form
+						});
+						optionsArea.appendChild(button);
+					});
+				} else { //
+                console.error('Error: data.options is not an array for a question type response.', data); //
+                // You might want to display a user-friendly message here too
+            }
             }
             if (responseArea) responseArea.textContent = ''; // Clear previous summary
         } else if (data.type === 'summary_and_options') {
-            if (guidingQuestionDiv) guidingQuestionDiv.textContent = data.follow_up_question;
-            if (responseArea) responseArea.textContent = data.summary;
+            if (guidingQuestionDiv) {
+				// Convert any existing newlines in explanation and follow_up_question to <br>
+				const explanationHtml = (data.explanation || '').replace(/\n/g, '<br>');
+				const followUpHtml = (data.follow_up_question || '').replace(/\n/g, '<br>');
+
+				// Set innerHTML to render the <br> tags, adding a separator only if followUpHtml exists
+				guidingQuestionDiv.innerHTML = explanationHtml + (followUpHtml ? '<p>' + followUpHtml : '</p>');
+			}
+			//console.log("Bot said: "+guidingQuestionDiv.innerHTML);
+			//console.log(formElement.dataset.purpose);
+			const purpose = formElement.dataset.purpose;
+            if (responseArea) responseArea.textContent = data.full_summary_state[purpose];
             if (optionsArea) {
                 optionsArea.innerHTML = ''; // Clear previous options
                 optionsArea.classList.remove('hidden-dynamic');
 
                 // Add AI-generated suggested questions
-                data.suggested_questions.forEach(optionText => {
+                data.options.forEach(optionText => {
                     const button = document.createElement('button');
                     button.type = 'button';
                     button.classList.add('option-button');
@@ -126,7 +154,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             if (userInputField) userInputField.value = ''; // Clear input field after submission
-            currentSummaries[formElement.dataset.purpose] = data.summary; // Store summary
+            currentSummaries[formElement.dataset.purpose] = data.full_summary_state[purpose]; // Store summary
+            completedStatus[formElement.dataset.purpose] = 1;
             updateProgressBar();
         } else if (data.type === 'summary_only') {
             if (finalResponseArea) finalResponseArea.textContent = data.summary;
@@ -158,12 +187,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({
                     userInput: userInput,
-                    purpose: purpose
+                    purpose: purpose,
+					currentSummaries :currentSummaries 
                 }),
             });
 
             const data = await response.json();
+			console.log('Received data from backend:', data);			
+			//console.log(purpose,": ",data.full_summary_state[purpose]);
             displayMessage(form, data);
+			currentSummaries = 	data.full_summary_state
 
             // If it's a summary and options, clear the input field
             if (data.type === 'summary_and_options') {
@@ -235,6 +268,31 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Initial progress bar update
-    updateProgressBar();
+    
+
+
+    //AI Disclaimer
+    const consentModal = document.getElementById('consentModal');
+    const consentCheckbox = document.getElementById('consentCheckbox');
+    const agreeBtn = document.getElementById('agreeBtn');
+    const mainAppContent = document.getElementById('main-app-content');
+    mainAppContent.style.display = 'none';
+    // Enable the button only when the checkbox is checked
+    consentCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            agreeBtn.classList.add('enabled');
+        } else {
+            agreeBtn.classList.remove('enabled');
+        }
+    });
+
+    // Handle the "Agree" button click
+    agreeBtn.addEventListener('click', function() {
+        if (consentCheckbox.checked) {
+            consentModal.style.display = 'none'; // Hide the modal
+            mainAppContent.style.display = 'block'; // Show the main content
+            // Initial progress bar update
+            updateProgressBar();
+        }
+    });
 });

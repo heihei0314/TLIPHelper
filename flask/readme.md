@@ -81,7 +81,13 @@ pip install -r /flask/requirements.txt
 1.  **Navigate into the `backend` directory:**
 
     ```bash
-    cd backend
+    cd /var/www/html/TLIPHelper/backend
+    ```
+
+    or
+
+    [debug mode]```bash
+    cd /flask/backend
     ```
 
 2.  **Run the Flask application:**
@@ -89,15 +95,21 @@ pip install -r /flask/requirements.txt
     ```bash
     gunicorn --workers 3 --bind 127.0.0.1:8002 app:app --daemon --pid /tmp/tlip_helper_gunicorn.pid
     ```
+    If the python files are updated, to restart the service, stop it first:
+    
+    ```bash
+    PID=$(cat /tmp/tlip_helper_gunicorn.pid)
+    kill $PID
+    gunicorn --workers 3 --bind 127.0.0.1:8002 app:app --daemon --pid /tmp/tlip_helper_gunicorn.pid
+    ```
 
     or
 
-    Typcially run in debug mode on `http://127.0.0.1:8002/`.
-    ```bash
-    python app.py
+    [debug mode]```bash
+    python3 app.py
     ```
 
-3.  **Open your web browser** and navigate to `http://127.0.0.1:8002/` or `http://yourdomain.com/`.
+3.  **Open your web browser** and navigate to [debug mode]`http://127.0.0.1:8001/` or `https://pdev6800z-ai.ust.hk/tlip-helper/`.
 
 ## Running Tests
 
@@ -114,7 +126,7 @@ To run the unit tests for the backend logic:
 3.  **Run the tests:**
 
     ```bash
-    python -m unittest unit_test/test_main.py
+    python3 -m unittest unit_test/test_main.py
     ```
 
     This will execute all test cases defined in `unit_test/test_main.py` and report the results.
@@ -150,13 +162,10 @@ Simulating user creation and login flows to ensure authentication and user manag
 Testing data flow between the application and external databases or third-party services.
 
 ## Future Improvements
-**imporve the prompts**
 **imporve the UI**
 **Add a agent to judge**
-**Add a agent to identify the finishing line for each step**
-
+**Add a agent to generate suggestions**
 
 
 ## License
-
 This project is open-source.

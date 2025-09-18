@@ -14,4 +14,11 @@ pedagogy:
 What they want student learn by using this application
 
 implementation:
-How to distribute to student
+How to distribute to student.
+
+Testing case:
+enhance students' engagement in the classroom
+increase student's interest in math subject
+Math game
+Battleship game
+
