@@ -1,0 +1,60 @@
+{
+    "integrator_dataset": [
+        {
+            "query": "Case 1",
+            "ground_truth_keywords": [
+                "Project Objective", 
+                "Learning Outcomes", 
+                "Pedagogy & Technology", 
+                "Development Plan",
+                "Implementation Plan",
+                "Evaluation Plan",
+                "Suggestions"
+            ],
+            "full_summary_state": {
+                "objective": "1. Improve student motivation.",
+                "outcomes": "1. Students will be able to analyze case studies.",
+                "pedagogy": "Pedagogical Approaches:<br>1. Flipped classroom model<br>Technology Tools:<br>1. Moodle",
+                "development": "Required Features:<br>1. A student dashboard<br>Timeline:<br>1. Q1 2026<br>",
+                "implementation": "Pilot/Rollout Strategy:<br>1. Pilot in a single course<br>Implementation Timeline:<br>1. Fall 2026<br>",
+                "evaluation": "Evaluation Criteria:<br>1. Student engagement<br>"
+            }
+        },
+        {
+            "query": "Case 2",
+            "ground_truth_keywords": [
+                "Project Objective",
+                "Learning Outcomes",
+                "Pedagogy & Technology",
+                "Summary of Incomplete Sections",
+                "Suggestions"
+            ],
+            "full_summary_state": {
+                "objective": "1. Develop critical thinking skills.",
+                "outcomes": "",
+                "pedagogy": "Pedagogical Approaches:<br>1. Active Learning<br>",
+                "development": "To be defined.",
+                "implementation": "",
+                "evaluation": "To be defined."
+            }
+        },
+        {
+            "query": "Case 3",
+            "ground_truth_keywords": [
+                "Project Objective",
+                "Learning Outcomes",
+                "Pedagogy & Technology",
+                "Evaluation Plan",
+                "Suggestions"
+            ],
+            "full_summary_state": {
+                "objective": "1. Increase student collaboration.",
+                "outcomes": "1. Students will create a group project.",
+                "pedagogy": "Pedagogical Approaches:<br>1. Collaborative Learning<br>Technology Tools:<br>1. Microsoft Teams",
+                "development": "To be defined.",
+                "implementation": "To be defined.",
+                "evaluation": "Evaluation Criteria:<br>1. Teamwork skills<br>Tools/Methods:<br>1. Peer feedback surveys<br>"
+            }
+        }
+    ]
+}

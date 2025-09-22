@@ -121,8 +121,9 @@ def get_openai_reply(user_input, purpose, current_summary_array):
             retrieved_context = rag_manager.get_relevant_context(user_input)
             
         # Add a note to the system prompt to instruct the AI to use the retrieved context
+        system_prompt = f"{config['persona']}"
         system_prompt_with_rag = f"""
-        {config["persona"]}
+        {system_prompt}
         
         **Reference Material**
         Use the following information as reference to improve your output.
@@ -192,7 +193,7 @@ def get_openai_reply(user_input, purpose, current_summary_array):
             ]
         
             # Use a retry loop to handle JSON errors
-            max_retries = 2
+            max_retries = 3
             for i in range(max_retries):
                 try:
                     completion = client.chat.completions.create(
@@ -209,14 +210,14 @@ def get_openai_reply(user_input, purpose, current_summary_array):
                     break
                 except json.JSONDecodeError:
                     # If JSON parsing fails, update the chat history with a correction message
-                    correction_prompt = "The previous response was not a valid JSON. Please provide a valid JSON object without any additional text. Strictly adhere to the format."
+                    correction_prompt = "This response was not a valid JSON. Please restructure the response as a valid JSON object without any additional text. Strictly adhere to the format."
                     # Append the correction to the messages list
-                    messages.append({"role": "assistant", "content": ai_response_str}) # The invalid response
+                    # messages.append({"role": "assistant", "content": ai_response_str}) # The instruction to correct
                     messages.append({"role": "user", "content": correction_prompt}) # The instruction to correct
                 
                     if i == max_retries - 1:
                         # If this is the last retry, return a failure message
-                        return json.dumps({"type": "error", "summary": f"Failed to get a valid JSON response after {max_retries} attempts. The AI did not adhere to the format."}), current_summary_array
+                        return json.dumps({"type": "error", "summary": f"Failed to get a valid JSON response after {max_retries} attempts. The AI did not adhere to the format. The response: {ai_response_str}"}), current_summary_array
 
             # After getting the JSON response, we call a separate function to generate the summary.
             summary_response = generate_summary(purpose, user_input, current_purpose_summary)
@@ -231,7 +232,7 @@ def get_openai_reply(user_input, purpose, current_summary_array):
             return json.dumps(response_data), current_summary_array
 
     except json.JSONDecodeError:
-        return json.dumps({"type": "error", "summary": f"The AI response for '{purpose}' was not in the expected JSON format. Please try again."}), current_summary_array
+        return json.dumps({"type": "error", "summary": f"The AI response for '{purpose}' was not in the expected JSON format. Please try again. The response: {ai_response_str}"}), current_summary_array
     except Exception as e:
         return json.dumps({"type": "error", "summary": f"An error occurred during AI processing for '{purpose}': {str(e)}"}), current_summary_array
 

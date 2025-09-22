@@ -1,12 +1,13 @@
-import os
+import unittest
 import json
+import os
 import sys
-from openai import AzureOpenAI
 from dotenv import load_dotenv
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import Chroma
+from openai import AzureOpenAI
+from unittest.mock import patch, MagicMock
+from pathlib import Path
 
-# Add the backend directory to the Python path to allow importing main
+# Dynamically add the 'backend' directory to sys.path
 script_dir = os.path.dirname(os.path.abspath(__file__))
 backend_dir = os.path.abspath(os.path.join(script_dir, '..'))
 sys.path.insert(0, backend_dir)
@@ -18,6 +19,9 @@ except ImportError as e:
     print(f"Error importing functions from main.py: {e}", file=sys.stderr)
     sys.exit(1)
 
+
+
+
 # --- Configuration ---
 dotenv_path = os.path.join(script_dir, '../.env')
 load_dotenv(dotenv_path=dotenv_path)
@@ -28,7 +32,7 @@ AZURE_OPENAI_API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION")
 AZURE_OPENAI_EVAL_DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
 
 VECTOR_DB_PATH = os.path.join(script_dir, '../rag_db')
-DATASET_PATH = os.path.join(script_dir, 'golden_dataset.json')
+DATASET_PATH = os.path.join(script_dir, 'integrator_dataset.json')
 
 # --- Evaluation Functions ---
 
@@ -44,26 +48,25 @@ def run_evaluation():
 
         # 2. Load the golden dataset
         with open(DATASET_PATH, 'r', encoding='utf-8') as f:
-            golden_dataset = json.load(f)["golden_dataset"]
+            integrator_dataset = json.load(f)["integrator_dataset"]
 
         total_scores = {"factual_accuracy": 0, "faithfulness": 0, "relevance": 0}
         num_evaluated = 0
 
         # 3. Run evaluation loop
         print("\n--- Starting Evaluation ---")
-        initial_summary_array = {
-            "objective": "", "outcomes": "", "pedagogy": "",
-            "development": "", "implementation": "", "evaluation": ""
-        }
-
-        for item in golden_dataset:
-            query = item["query"]
-            purpose = item["purpose"] # Use purpose from the dataset
-            ground_truth = item["ground_truth"]
+        
+        for test_case in integrator_dataset:
+            query = test_case["query"]
+            purpose = "integrator"
+            ground_truth_keywords = test_case["ground_truth_keywords"]
+            
+            # The summary array contains a full or partial proposal
+            current_summary_array = test_case["full_summary_state"]
 
             # Call main.py's get_openai_reply function
-            response_data_str, updated_summary_array = get_openai_reply(query, purpose, initial_summary_array.copy())
-            initial_summary_array = updated_summary_array
+            response_data_str, updated_summary_array = get_openai_reply(query, purpose, current_summary_array.copy())
+            
             # --- Printing for Debugging ---
             print(f"\n[DEBUG] --- Test Case: {purpose} | Query: '{query}' ---")
             print("[DEBUG] Response JSON String:")
@@ -71,13 +74,13 @@ def run_evaluation():
             print("[DEBUG] Updated Summary Array:")
             print(json.dumps(updated_summary_array, indent=2))
             print("------------------------------------------")
-            
+
             try:
                 response_json = json.loads(response_data_str)
                 generated_answer = response_json.get("summary") or response_json.get("explanation")
                 
                 # Use the evaluation client to score the answer
-                eval_scores = evaluate_answer(query, generated_answer, "", ground_truth, eval_client)
+                eval_scores = evaluate_answer(current_summary_array, generated_answer, "", ground_truth_keywords, eval_client)
 
                 if eval_scores:
                     print(f"  Factual Accuracy: {eval_scores['factual_accuracy']:.2f}")
@@ -115,15 +118,15 @@ def evaluate_answer(query, generated_answer, retrieved_context, ground_truth, cl
     """Evaluates the generated answer using an LLM as a judge."""
     # This prompt asks the LLM to evaluate the answer's factual accuracy and faithfulness
     eval_prompt = f"""
-    You are an expert evaluator. Your task is to rate the quality of a generated answer based on the provided question, ground truth, and context.
+    You are an expert evaluator. Your task is to rate the quality of a generated answer based on the provided summary array, ground truth keywords, and context.
 
     **Question:** {query}
     **Generated Answer:** {generated_answer}
-    **Ground Truth:** {ground_truth}
+    **Ground Truth Keyords:** {ground_truth}
     **Retrieved Context:** {retrieved_context}
 
     Evaluate the following metrics and provide a score from 0.0 to 1.0 for each:
-    1. **Factual Accuracy:** Does the Generated Answer factually agree with the Ground Truth and Retrieved Context?
+    1. **Factual Accuracy:** Does the Generated Answer factually agree with the Ground Truth Keyords and Retrieved Context?
     2. **Faithfulness:** Is the Generated Answer strictly based on the Retrieved Context? (Score 0.0 if any part of the answer is not supported by the context).
     3. **Relevance:** Is the Generated Answer relevant to the initial Question?
 

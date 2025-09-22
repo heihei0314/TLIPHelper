@@ -91,19 +91,34 @@
             "ground_truth": "The target for success is a 15% increase in student performance on final project rubrics and an average student satisfaction score of 4.5 out of 5."
         },
         {
-            "purpose": "irrelevant",
+            "purpose": "objective",
             "query": "How do I fix a bug in my Python code?",
-            "ground_truth": "I am sorry, but I am an AI assistant designed to help with educational innovation project proposals. I cannot help with your Python code. Please ask me about your project plan."
+            "ground_truth": "I am sorry, but I am an AI assistant designed to help with educational innovation project proposals. I cannot help with your Python code. Please ask me about your project plan.",
+            "remark":"irrelvant"
         },
         {
-            "purpose": "irrelevant",
+            "purpose": "pedagogy",
             "query": "What is the capital of France?",
-            "ground_truth": "I am an AI assistant for educational innovation project proposals. I cannot answer general knowledge questions. Please ask me about your project plan."
+            "ground_truth": "I am an AI assistant for educational innovation project proposals. I cannot answer general knowledge questions. Please ask me about your project plan.",
+            "remark":"irrelvant"
         },
         {
-            "purpose": "irrelevant",
+            "purpose": "development",
+            "query": "How do I fix a bug in my Python code?",
+            "ground_truth": "I am sorry, but I am an AI assistant designed to help with educational innovation project proposals. I cannot help with your Python code. Please ask me about your project plan.",
+            "remark":"irrelvant"
+        },
+        {
+            "purpose": "implementation",
+            "query": "What is the capital of France?",
+            "ground_truth": "I am an AI assistant for educational innovation project proposals. I cannot answer general knowledge questions. Please ask me about your project plan.",
+            "remark":"irrelvant"
+        },
+        {
+            "purpose": "evaluation",
             "query": "Can you tell me a joke?",
-            "ground_truth": "I am an AI assistant for educational innovation project proposals, not a comedian. Please ask me about your project plan."
+            "ground_truth": "I am an AI assistant for educational innovation project proposals, not a comedian. Please ask me about your project plan.",
+            "remark":"irrelvant"
         }
     ]
 }

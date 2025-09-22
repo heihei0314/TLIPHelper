@@ -2,3 +2,9 @@ Flask
 python-dotenv
 openai
 Flask-Cors
+python-docx
+langchain-community
+langchain-huggingface
+langchain-chroma
+sentence-transformers
+chromadb

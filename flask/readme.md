@@ -53,7 +53,7 @@ The backend is powered by a Flask application that interacts with an Azure OpenA
 ## Setup Instructions
 
 ### Prerequisites
-pip install -r /flask/requirements.txt
+pip3 install -r /flask/requirements.txt
 
 ### Installation
 
