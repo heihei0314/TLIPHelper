@@ -24,6 +24,7 @@ The backend is powered by a Flask application that interacts with an Azure OpenA
 * **Multi-Step Guidance:** Guides users through 6 distinct phases of project planning (Objective, Outcomes, Pedagogy, Development, Implementation, Evaluation).
 * **Final Proposal Synthesis:** Integrates all summarized steps into a single, comprehensive project proposal.
 * **AI-Powered Responses:** Utilizes Azure OpenAI to generate summaries, follow-up questions, and new options based on user input and predefined personas for each step.
+* **Contextual AI Grounding (RAG):** The AI's responses are grounded in a knowledge base built from a provided application form, ensuring factual accuracy and relevance.
 * **Interactive Frontend:** A clean, responsive web interface allows users to input text or select from AI-generated options.
 * **Progress Tracking:** A progress bar indicates the completion status of the proposal drafting.
 
@@ -38,8 +39,13 @@ The backend is powered by a Flask application that interacts with an Azure OpenA
     * `backend/app.py`: A Flask application that serves the frontend static files and exposes an API endpoint (`/api/chat`) for handling chatbot interactions. It manages session-specific data for each user's progress.
     * `backend/main.py`: Contains the core AI interaction logic, including persona definitions.
     * `backend/prompts.py`: Defines the system prompts and instructions for the AI model.
+    * `backend/rag_builder.py`: A utility script to process `.docx` files, create vector embeddings, and store them in a local vector database.
+    * `backend/rag_db/`: A directory that stores the vector database (ChromaDB) created by `rag_builder.py`.
     * `backend/unit_test/test_main.py`: Unit tests for the `main.py` functions.
+    * `backend/unit_test/evaluate_rag.py`: Unit tests for the result of `rag_db/` from `rag_builder.py` Accuracy and Relevance.
     * `backend/__init__.py` and `unit_test/__init__.py`: Tells Python that this directory should be treated as a Python package.
+* **Data:**
+    * `xx.docx`: storing the relevance document for reference, including proposal template, faq and guideline.
 * **Configuration:**
     * `../../.env`: Stores sensitive API keys and configuration details.
     * `backend/requirements.txt`: Lists all Python dependencies required for the backend.
@@ -60,11 +66,18 @@ pip install -r /flask/requirements.txt
     │   ├── app.py
     │   ├── main.py
     │   ├── prompts.py
+    │   ├── rag_builder.py
     │   ├── requirements.txt
+    │   ├── rag_db/
     │   └── unit_test/
-    │       └── __init__.py  
-    │       └── test_main.py
-    │       └── test_integration.py
+    │       ├── __init__.py  
+    │       ├── test_main.py
+    │       ├── evaluate_rag.py
+    │       └── golden_dataset.json
+    ├── data/
+    │   ├── application form.docx/
+    │   ├── practical guideline.docx/
+    │   └── FAQ.docx/
     └── static/
         ├── index.html
         ├── css/
@@ -74,6 +87,30 @@ pip install -r /flask/requirements.txt
         └── assets/
             └── bot.png (or your bot icon)
     ```
+
+
+## Build the RAG Knowledge Base
+1. Place `.docx` reference files into the `backend/data` directory.
+
+2.  **Navigate into the `backend` directory:**
+
+    ```bash
+    cd /var/www/html/TLIPHelper/backend
+    ```
+
+    or
+
+    [debug mode]```bash
+    cd flask/backend
+    ```
+
+3. Run the `rag_builder.py` script.
+    
+    ```bash
+    python3 rag_builder.py
+    ```
+    This will create the `rag_db` directory containing vector database.
+
 
 
 ## Running the Application
@@ -87,7 +124,7 @@ pip install -r /flask/requirements.txt
     or
 
     [debug mode]```bash
-    cd /flask/backend
+    cd flask/backend
     ```
 
 2.  **Run the Flask application:**
@@ -131,6 +168,58 @@ To run the unit tests for the backend logic:
 
     This will execute all test cases defined in `unit_test/test_main.py` and report the results.
 
+## Testing
+This section describes the testing strategy and the purpose of the main test files.
+
+### RAG Pipeline Evaluation
+To evaluate the RAG pipeline's performance, run the `evaluate_rag.py` script.
+
+1. Navigate to the backend directory.
+
+    ```bash
+    cd /var/www/html/TLIPHelper/backend
+    ```
+
+    or
+
+    [debug mode]```bash
+    cd flask/backend
+    ```
+2. Run the script.
+
+    ```bash
+    python3 evaluate_rag.py
+    ```
+    This script uses the `golden_dataset.json` file to test if the RAG system retrieves the correct information and provides factually accurate answers.
+
+### Main Function Evaluation
+    
+The `golden_dataset.json` file contains a comprehensive suite of tests for the backend application, focusing on the core AI functionality and the RAG pipeline. It includes:
+
+    1. Azure OpenAI API Connection Test: This is the primary test that runs first to ensure a stable connection and an expected response from the configured Azure OpenAI endpoint. It verifies that the API key, endpoint, API version, and deployment name are correctly loaded, and that a basic chat completion call succeeds.
+
+    2. Automated Evaluation with Golden Dataset: This suite of tests validates the end-to-end performance of the RAG pipeline. It automatically runs a set of predefined queries from the golden_dataset.json file to check the following:
+        - Factual Accuracy: It verifies that the AI's generated response is factually correct and aligns with the ground truth answer in the dataset.
+        - Faithfulness: It measures whether the AI's answer is strictly based on the retrieved context from your application form documents. This is a crucial test for detecting "hallucinations."
+        - Relevance: It ensures that the AI's response directly addresses the user's question.
+
+    3. General Unit Tests: These tests focus on the output of the get_openai_reply function. They validate that the function's response is in a valid JSON format and contains all the expected keys (type, explanation, follow_up_question, options, etc.), ensuring the API's contract with the frontend is met.
+
+    4. Navigate to the backend directory.
+
+        ```bash
+        cd /var/www/html/TLIPHelper/backend
+        ```
+
+        or
+
+        [debug mode]```bash
+        cd flask/backend
+        ```
+    5. Run the script.
+        ```bash
+        python3 evaluate_rag.py
+        ```
 
 ## Usage
 
@@ -141,30 +230,6 @@ To run the unit tests for the backend logic:
 5.  Your progress will be tracked by the progress bar at the top.
 6.  Continue through each step (Objective, Outcomes, Pedagogy, Development, Implementation, Evaluation).
 7.  Once you have completed all steps, click the "Synthesize" button in the "Final Step!" section to generate a comprehensive project proposal based on all your inputs.
-
-Testing
-This section describes the testing strategy and the purpose of the main test files.
-
-test_main.py (Unit and API Tests)
-This file contains a comprehensive suite of tests for the backend application. It includes:
-
-Azure OpenAI API Connection Test: This is the primary test that runs first to ensure a stable connection and expected response from the configured Azure OpenAI endpoint. It verifies the API key, endpoint, API version, and deployment name are correctly loaded and that a basic chat completion call succeeds.
-
-get_openai_reply Function Tests: These tests focus on the output of the get_openai_reply function (presumably from main.py). They validate that the function's response is in a valid JSON format and that it contains all the expected keys (type, explanation, follow_up_question, summary, suggested_questions).
-
-General Unit Tests: Includes basic unit tests for individual functions within the application, ensuring their core logic works as expected.
-
-test_integration.py (Integration Tests)
-This file (or section, if integrated into test_main.py as in the provided example) contains tests that verify the interaction between different components or services of the application. These tests are designed to ensure that various parts of the system work correctly together. Examples include:
-
-Simulating user creation and login flows to ensure authentication and user management systems are integrated properly.
-
-Testing data flow between the application and external databases or third-party services.
-
-## Future Improvements
-**imporve the UI**
-**Add a agent to judge**
-**Add a agent to generate suggestions**
 
 
 ## License

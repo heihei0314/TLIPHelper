@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Handle the final integration button click
     integrateBtn.addEventListener('click', async () => {
-        finalResponseArea.textContent = 'Generating final proposal...';
+        finalResponseArea.textContent = 'Generating...';
         integrateBtn.disabled = true;
         integrateBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Synthesizing...';
 

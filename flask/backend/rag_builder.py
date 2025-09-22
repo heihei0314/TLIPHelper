@@ -1,0 +1,79 @@
+import os
+from docx import Document
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import Chroma
+from langchain_huggingface.embeddings import HuggingFaceEmbeddings
+
+
+# Make sure you have the necessary libraries installed
+# pip install python-docx langchain langchain-community sentence-transformers chromadb
+
+# --- Step 1: Document Processing for Multiple Files ---
+def extract_text_from_multiple_docx(directory_path):
+    """Extracts text from all .docx files in a given directory."""
+    full_text = ""
+    if not os.path.isdir(directory_path):
+        print(f"Error: Directory not found at {directory_path}")
+        return None
+
+    # Iterate through all files in the specified directory
+    for filename in os.listdir(directory_path):
+        if filename.endswith(".docx"):
+            file_path = os.path.join(directory_path, filename)
+            try:
+                doc = Document(file_path)
+                for para in doc.paragraphs:
+                    full_text += para.text + "\n"
+                print(f"Successfully extracted text from: {filename}")
+            except Exception as e:
+                print(f"Error extracting text from {filename}: {e}")
+                
+    return full_text if full_text else None
+
+# --- Step 2: Chunking ---
+def chunk_text(text, chunk_size=1000, chunk_overlap=200):
+    """Splits a large text document into smaller, overlapping chunks."""
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        length_function=len
+    )
+    return text_splitter.split_text(text)
+
+# --- Step 3: Embedding and Storing ---
+def embed_and_store_chunks(chunks, persist_directory="./rag_db"):
+    """
+    Converts text chunks into vector embeddings and stores them in a
+    local vector database (ChromaDB).
+    """
+    embeddings_model = HuggingFaceEmbeddings(
+        model_name="all-MiniLM-L6-v2"
+    )
+
+    vector_store = Chroma.from_texts(
+        texts=chunks,
+        embedding=embeddings_model,
+        persist_directory=persist_directory
+    )
+    
+    vector_store.persist()
+    print(f"Successfully embedded and stored {len(chunks)} chunks.")
+    return vector_store
+
+# --- Main Execution ---
+if __name__ == "__main__":
+    # Define the path to your data directory
+    data_dir = os.path.join(os.path.dirname(__file__), '../data')
+    
+    # 1. Extract text from all DOCX files in the data directory
+    raw_text = extract_text_from_multiple_docx(data_dir)
+    
+    if raw_text:
+        # 2. Split the combined text into manageable chunks
+        text_chunks = chunk_text(raw_text)
+        
+        # 3. Embed the chunks and store them in a vector database
+        db = embed_and_store_chunks(text_chunks)
+        print("RAG knowledge base for all documents built successfully!")
+    else:
+        print("No text was extracted. Please check the data directory and file formats.")

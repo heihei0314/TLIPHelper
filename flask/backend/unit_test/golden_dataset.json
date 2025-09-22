@@ -1,0 +1,109 @@
+{
+    "golden_dataset": [
+        {
+            "purpose": "objective",
+            "query": "What is the maximum number of pages for the proposal?",
+            "ground_truth": "The proposal document has a maximum length of 15 pages, excluding the appendices."
+        },
+        {
+            "purpose": "objective",
+            "query": "How many reference letters are required?",
+            "ground_truth": "Two reference letters are required, one from a direct supervisor and one from a senior academic."
+        },
+        {
+            "purpose": "objective",
+            "query": "What is the deadline for submitting the proposal?",
+            "ground_truth": "The deadline for submitting the proposal is not specified in the provided documents."
+        },
+        {
+            "purpose": "outcomes",
+            "query": "What should learners be able to do after the project?",
+            "ground_truth": "The project aims to improve student's analytical and communication skills, enabling them to evaluate and present solutions effectively."
+        },
+        {
+            "purpose": "outcomes",
+            "query": "How will the outcomes be measured?",
+            "ground_truth": "Learning outcomes will be measured using a project rubric and pre/post-tests."
+        },
+        {
+            "purpose": "outcomes",
+            "query": "Can you define a learning outcome for teamwork?",
+            "ground_truth": "Students will be able to collaborate effectively in a team to solve a complex problem and present their findings."
+        },
+        {
+            "purpose": "pedagogy",
+            "query": "What teaching methods are we considering?",
+            "ground_truth": "The pedagogical approaches include active learning, collaborative learning, and the flipped classroom model."
+        },
+        {
+            "purpose": "pedagogy",
+            "query": "What technology will be used?",
+            "ground_truth": "We will use an online platform for collaboration and a digital portfolio system for student work."
+        },
+        {
+            "purpose": "pedagogy",
+            "query": "Can you explain the flipped classroom model?",
+            "ground_truth": "The flipped classroom model is a pedagogical approach where students learn new content at home and apply that knowledge in the classroom through interactive activities and discussions."
+        },
+        {
+            "purpose": "development",
+            "query": "What is the project timeline?",
+            "ground_truth": "The project timeline is a 12-month plan, starting in September 2025 and ending in August 2026."
+        },
+        {
+            "purpose": "development",
+            "query": "What are the key features of the application?",
+            "ground_truth": "The key features include a discussion forum, a peer review module, and a gradebook."
+        },
+        {
+            "purpose": "development",
+            "query": "What is the hiring plan?",
+            "ground_truth": "The hiring plan includes one full-time software developer and one part-time project manager."
+        },
+        {
+            "purpose": "implementation",
+            "query": "What is the pilot testing strategy?",
+            "ground_truth": "The pilot testing strategy involves a small-scale trial in a single course section during the Fall 2025 semester."
+        },
+        {
+            "purpose": "implementation",
+            "query": "How will the project be rolled out?",
+            "ground_truth": "The project will be rolled out to all 10 sections of the course in the Spring 2026 semester, after a successful pilot."
+        },
+        {
+            "purpose": "implementation",
+            "query": "What is the resource allocation?",
+            "ground_truth": "Resources will be allocated for server hosting, software licenses, and personnel salaries."
+        },
+        {
+            "purpose": "evaluation",
+            "query": "What criteria will we use for evaluation?",
+            "ground_truth": "The evaluation criteria include student engagement, knowledge gain, and student satisfaction."
+        },
+        {
+            "purpose": "evaluation",
+            "query": "What are the evaluation methods?",
+            "ground_truth": "Evaluation methods include student surveys, focus groups, and pre/post-tests."
+        },
+        {
+            "purpose": "evaluation",
+            "query": "What is the target for success?",
+            "ground_truth": "The target for success is a 15% increase in student performance on final project rubrics and an average student satisfaction score of 4.5 out of 5."
+        },
+        {
+            "purpose": "irrelevant",
+            "query": "How do I fix a bug in my Python code?",
+            "ground_truth": "I am sorry, but I am an AI assistant designed to help with educational innovation project proposals. I cannot help with your Python code. Please ask me about your project plan."
+        },
+        {
+            "purpose": "irrelevant",
+            "query": "What is the capital of France?",
+            "ground_truth": "I am an AI assistant for educational innovation project proposals. I cannot answer general knowledge questions. Please ask me about your project plan."
+        },
+        {
+            "purpose": "irrelevant",
+            "query": "Can you tell me a joke?",
+            "ground_truth": "I am an AI assistant for educational innovation project proposals, not a comedian. Please ask me about your project plan."
+        }
+    ]
+}

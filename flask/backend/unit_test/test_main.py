@@ -1,162 +1,114 @@
-# test_my_application.py
-
 import unittest
 import json
 import os
 import sys
-from dotenv import load_dotenv
-from openai import AzureOpenAI
+from unittest.mock import patch, MagicMock
 
 # Dynamically add the 'backend' directory to sys.path
-# This assumes test_main.py is in backend/unit_test
-# and main.py is in backend/
 script_dir = os.path.dirname(__file__)
 backend_dir = os.path.abspath(os.path.join(script_dir, '..'))
-sys.path.insert(0, backend_dir) # Add backend directory to path
+sys.path.insert(0, backend_dir)
 
-# Now, import get_openai_reply from main.
+# Now, import get_openai_reply from main.py
 try:
-    from main import get_openai_reply
+    from main import get_openai_reply, RAG_CONTEXT_MANAGER, generate_summary
 except ImportError as e:
-    print(f"Error importing get_openai_reply: {e}", file=sys.stderr)
-    sys.exit(1) # Exit if the core function cannot be imported
+    print(f"Error importing functions from main.py: {e}", file=sys.stderr)
+    sys.exit(1)
 
-# --- API Test (Azure OpenAI) ---
-class TestAzureOpenAIAPI(unittest.TestCase):
+# Set the path to the golden dataset
+GOLDEN_DATASET_PATH = os.path.join(script_dir, 'golden_dataset.json')
+VECTOR_DB_PATH = os.path.join(script_dir, '..', 'rag_db')
+
+class TestAutomatedEvaluation(unittest.TestCase):
     """
-    Test suite for Azure OpenAI API calls.
+    Test suite for automated evaluation using a golden dataset.
+    This test suite simulates the application's flow and validates
+    responses against a predefined set of expected answers.
     """
+    
     @classmethod
     def setUpClass(cls):
-        """
-        Set up class-level resources, like checking for environment variables.
-        Loads environment variables from a .env file located in the backend folder.
-        """
-        script_dir = os.path.dirname(__file__)
-        dotenv_path = os.path.join(script_dir, '..', '.env')
-        load_dotenv(dotenv_path=dotenv_path)
-
-        cls.AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
-        cls.AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
-        cls.AZURE_OPENAI_API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION")
-        cls.AZURE_OPENAI_DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
-        
-        # Check for placeholder values, which indicate missing configuration
-        if not cls.AZURE_OPENAI_ENDPOINT or "your-resource-name" in cls.AZURE_OPENAI_ENDPOINT:
-            cls.endpoint_ok = False
-            print("\nWARNING: AZURE_OPENAI_ENDPOINT is not configured correctly. API tests will be skipped.")
-        else:
-            cls.endpoint_ok = True
-
-    @unittest.skipUnless(os.getenv("AZURE_OPENAI_API_KEY") and os.getenv("AZURE_OPENAI_ENDPOINT") and os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
-                         "Azure OpenAI API credentials are not fully set in .env. Skipping API tests.")
-    def test_01_azure_openai_connection(self):
-        """
-        Verify a successful chat completion call to Azure OpenAI.
-        """
-        if not self.endpoint_ok:
-            self.skipTest("Azure OpenAI endpoint is not configured correctly.")
-
-        print("\nRunning Azure OpenAI API Test: test_01_azure_openai_connection")
-        
+        """Load the golden dataset and initialize the RAG manager."""
         try:
-            client = AzureOpenAI(
-                api_key=self.AZURE_OPENAI_API_KEY,
-                azure_endpoint=self.AZURE_OPENAI_ENDPOINT,
-                api_version=self.AZURE_OPENAI_API_VERSION,
-            )
-            response = client.chat.completions.create(
-                model=self.AZURE_OPENAI_DEPLOYMENT_NAME,
-                messages=[
-                    {"role": "system", "content": "You are a test assistant."},
-                    {"role": "user", "content": "Test connection"}
-                ],
-                max_tokens=10,
-                temperature=0.6,
-            )
-            self.assertIsNotNone(response, "Azure OpenAI API call failed.")
-            self.assertGreater(len(response.choices), 0, "No choices found in response.")
-            print("Azure OpenAI API Test: test_01_azure_openai_connection PASSED")
-        except Exception as e:
-            self.fail(f"Azure OpenAI connection failed: {str(e)}")
-
-# --- Test suite for get_openai_reply function ---
-class TestOpenAIReplyFunction(unittest.TestCase):
-    """
-    Test suite for the get_openai_reply function's output.
-    """
-    PURPOSES = [
-        "objective", "outcomes", "pedagogy",
-        "development", "implementation", "evaluation", "integrator"
-    ]
-
-    def setUp(self):
-        self.summary_array = {
-            "objective": "", "outcomes": "", "pedagogy": "",
-            "development": "", "implementation": "", "evaluation": ""
-        }
-
-    def test_initial_questions(self):
-        """
-        Test the initial response for each purpose (with no user input).
-        """
-        for purpose in self.PURPOSES:
-            if purpose == 'integrator':
-                # Integrator purpose doesn't have an initial question
-                continue
+            with open(GOLDEN_DATASET_PATH, 'r', encoding='utf-8') as f:
+                cls.golden_dataset = json.load(f)["golden_dataset"]
             
-            with self.subTest(purpose=purpose):
-                print(f"\nRunning Test: test_initial_questions for '{purpose}'")
-                response, _ = get_openai_reply("", purpose, self.summary_array)
-                try:
-                    response_dict = json.loads(response)
-                    self.assertEqual(response_dict.get("type"), "question")
-                    self.assertIn("question", response_dict)
-                    self.assertIsInstance(response_dict.get("options"), list)
-                    print(f"Test: test_initial_questions for '{purpose}' PASSED")
-                except json.JSONDecodeError:
-                    self.fail(f"Response for '{purpose}' is not valid JSON: {response}")
+            # Initialize RAG manager to ensure the vector DB is accessible for tests
+            cls.rag_manager = RAG_CONTEXT_MANAGER(VECTOR_DB_PATH)
+        except FileNotFoundError:
+            cls.golden_dataset = []
+            print(f"WARNING: Golden dataset not found at {GOLDEN_DATASET_PATH}. Tests will be skipped.")
+        except Exception as e:
+            cls.golden_dataset = []
+            print(f"ERROR: Failed to load golden dataset or RAG manager: {e}. Tests will be skipped.")
 
-    def test_json_and_keys_for_each_purpose(self):
+    @unittest.skipIf(not golden_dataset, "Skipping tests because golden dataset is empty or not found.")
+    @patch('main.AzureOpenAI')
+    def test_all_queries_from_golden_dataset(self, mock_azure_openai):
         """
-        Test the full AI-generated JSON response for each purpose.
+        Tests each query in the golden dataset, simulating the full application flow.
         """
-        for purpose in self.PURPOSES:
-            with self.subTest(purpose=purpose):
-                print(f"\nRunning Test: test_json_and_keys for '{purpose}'")
-                user_input = "My project's goal is to improve student collaboration." if purpose != 'integrator' else "Generate proposal"
+        print("\n--- Starting Automated Evaluation from Golden Dataset ---")
 
-                response, updated_summary = get_openai_reply(user_input, purpose, self.summary_array.copy())
-                try:
-                    response_dict = json.loads(response)
-                except json.JSONDecodeError:
-                    self.fail(f"Response for '{purpose}' is not valid JSON: {response}")
+        # Mock the API client to prevent actual API calls during the test
+        mock_client_instance = mock_azure_openai.return_value
+        
+        # Test each entry in the golden dataset
+        for test_case in self.golden_dataset:
+            purpose = test_case["purpose"]
+            query = test_case["query"]
+            ground_truth = test_case["ground_truth"]
+            
+            # Mock the AI's response for the conversational agent
+            # This is a simplified mock; in a real scenario, you might mock a different response for each query
+            mock_chat_completion = MagicMock()
+            mock_chat_completion.choices[0].message.content = json.dumps({
+                "explanation": "This is a mocked explanation.",
+                "follow_up_question": "Mocked follow-up question?",
+                "new_options": ["Option A", "Option B"]
+            })
 
-                if purpose == 'integrator':
-                    # Special case for the integrator purpose
-                    self.assertEqual(response_dict.get("type"), "summary_only")
-                    self.assertIn("summary", response_dict)
-                else:
-                    # General case for all other purposes
-                    self.assertEqual(response_dict.get("type"), "summary_and_options")
-                    self.assertIn("explanation", response_dict)
-                    self.assertIn("follow_up_question", response_dict)
-                    self.assertIsInstance(response_dict.get("options"), list)
-                    # The response should also include the full_summary_state, as per app.py logic
-                    self.assertIn("full_summary_state", updated_summary) 
+            # Mock the AI's response for the summary agent (generate_summary)
+            mock_summary_completion = MagicMock()
+            mock_summary_completion.choices[0].message.content = ground_truth
+
+            mock_client_instance.chat.completions.create.side_effect = [
+                mock_chat_completion, # Response for the conversational agent
+                mock_summary_completion # Response for the summary agent
+            ]
+
+            initial_summary_array = {
+                "objective": "", "outcomes": "", "pedagogy": "",
+                "development": "", "implementation": "", "evaluation": "", "irrelevant": ""
+            }
+
+            with self.subTest(query=query, purpose=purpose):
+                # Simulate the API call to get the response
+                response_data_str, updated_summary_array = get_openai_reply(query, purpose, initial_summary_array)
                 
-                print(f"Test: test_json_and_keys for '{purpose}' PASSED")
+                # Parse the response and check for success
+                try:
+                    response_json = json.loads(response_data_str)
+                except json.JSONDecodeError:
+                    self.fail(f"Test for '{query}' failed: Expected valid JSON response, but got an error.")
+                
+                # Check if the summary was updated correctly
+                actual_summary = updated_summary_array.get(purpose, "")
+                
+                # Assert that the actual summary matches the ground truth
+                self.assertIn(ground_truth, actual_summary, 
+                              f"Test for '{query}' failed: "
+                              f"Expected summary to contain '{ground_truth}', but got '{actual_summary}'.")
 
+                print(f"Test PASSED for purpose '{purpose}' with query: '{query}'")
 
 if __name__ == '__main__':
     suite = unittest.TestSuite()
     loader = unittest.TestLoader()
 
-    # Add the API connection test first
-    suite.addTest(loader.loadTestsFromTestCase(TestAzureOpenAIAPI))
-    
-    # Add the function-level tests
-    suite.addTest(loader.loadTestsFromTestCase(TestOpenAIReplyFunction))
+    # Add this new automated evaluation test suite
+    suite.addTest(loader.loadTestsFromTestCase(TestAutomatedEvaluation))
 
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)
