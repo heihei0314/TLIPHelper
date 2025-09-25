@@ -21,15 +21,15 @@ The backend is powered by a Flask application that interacts with an Azure OpenA
 10.  [License](#license)
 
 ## Objectives
-* 1. Ask Follow-up question to inspire user 
-* 2. Provide related options for user to consider 
-* 3. Explain and Answer User's question on Education and Innovational Development
-* 4. Summary User's idea and plan 
+* 1. **Ask Follow-up Questions:** This is about guiding the user through the proposal drafting process. The AI needs to be a mentor, not just a passive information source.
+* 2. **Provide Related Options:** This is about providing structure and helping users who may not know where to start. It requires the AI to understand the context and generate relevant choices.
+* 3. **Explain and Answer Questions:** This is the AI's role as a knowledge base. It needs to be able to provide accurate and helpful information based on its training data and your RAG documents.
+* 4. **Summarize User Ideas:** This is about capturing and organizing the user's input. This is a critical function for generating the preliminary proposal.
 
 ## Features
 
 * **Multi-Step Guidance:** Guides users through 6 distinct phases of project planning (Objective, Outcomes, Pedagogy, Development, Implementation, Evaluation).
-* **Final Proposal Synthesis:** Integrates all summarized steps into a single, comprehensive project proposal.
+* **Preliminary Proposal Synthesis:** Integrates all summarized steps into a single, comprehensive project proposal.
 * **AI-Powered Responses:** Utilizes Azure OpenAI to generate summaries, follow-up questions, and new options based on user input and predefined personas for each step.
 * **Contextual AI Grounding (RAG):** The AI's responses are grounded in a knowledge base.
 * **Interactive Frontend:** A clean, responsive web interface allows users to input text or select from AI-generated options.

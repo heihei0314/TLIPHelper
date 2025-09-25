@@ -3,14 +3,29 @@ from docx import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
-
+import fitz  # PyMuPDF
 
 # Make sure you have the necessary libraries installed
 # pip install python-docx langchain langchain-community sentence-transformers chromadb
 
 # --- Step 1: Document Processing for Multiple Files ---
+def extract_text_from_pdf(file_path):
+    """Extracts text from a single PDF file."""
+    text = ""
+    try:
+        # Open the PDF file
+        with fitz.open(file_path) as doc:
+            # Iterate through each page and extract text
+            for page in doc:
+                text += page.get_text()
+        print(f"Successfully extracted text from: {os.path.basename(file_path)}")
+        return text
+    except Exception as e:
+        print(f"Error extracting text from {os.path.basename(file_path)}: {e}")
+        return None
+    
 def extract_text_from_multiple_docx(directory_path):
-    """Extracts text from all .docx files in a given directory."""
+    """Extracts text from all .docx and .pdf files in a given directory."""
     full_text = ""
     if not os.path.isdir(directory_path):
         print(f"Error: Directory not found at {directory_path}")
@@ -18,8 +33,8 @@ def extract_text_from_multiple_docx(directory_path):
 
     # Iterate through all files in the specified directory
     for filename in os.listdir(directory_path):
-        if filename.endswith(".docx"):
-            file_path = os.path.join(directory_path, filename)
+        file_path = os.path.join(directory_path, filename)
+        if filename.endswith(".docx"):    
             try:
                 doc = Document(file_path)
                 for para in doc.paragraphs:
@@ -27,7 +42,10 @@ def extract_text_from_multiple_docx(directory_path):
                 print(f"Successfully extracted text from: {filename}")
             except Exception as e:
                 print(f"Error extracting text from {filename}: {e}")
-                
+        elif filename.endswith(".pdf"):
+            pdf_text = extract_text_from_pdf(file_path)
+            if pdf_text:
+                full_text += pdf_text + "\n"        
     return full_text if full_text else None
 
 # --- Step 2: Chunking ---

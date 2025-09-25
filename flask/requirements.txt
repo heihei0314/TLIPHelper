@@ -8,3 +8,4 @@ langchain-huggingface
 langchain-chroma
 sentence-transformers
 chromadb
+PyMuPDF
