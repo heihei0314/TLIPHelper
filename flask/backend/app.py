@@ -62,24 +62,30 @@ def chat():
             session_id = os.urandom(16).hex()
             session['session_id'] = session_id
             user_sessions[session_id] = {
-                "objective": "", "outcomes": "", "pedagogy": "",
-                "development": "", "implementation": "", "evaluation": ""
+                "history":[],
+                "summary":{
+                    "objective": "", "outcomes": "", "pedagogy": "",
+                    "development": "", "implementation": "", "evaluation": ""
+                }
             }
         
         # Now, current_summary_array can be safely accessed
-        current_summary_array = user_sessions[session_id]
+        current_summary_array = user_sessions[session_id]["summary"]
+        current_history_array = user_sessions[session_id]["history"]
 
         # Validate the purpose against the SYSTEM_PROMPTS keys
         if purpose not in SYSTEM_PROMPTS:
             return jsonify({"type": "error", "summary": f"Invalid 'purpose' provided: {purpose}"}), 400
 
         # Call the get_openai_reply function from main.py
-        response_data_str, updated_summary_array = get_openai_reply(user_input, purpose, current_summary_array)
+        response_data_str, updated_summary_array, updated_history_array = get_openai_reply(user_input, purpose, current_summary_array, current_history_array)
         response_json_from_main = json.loads(response_data_str)
         
         # Update the session's summary array
-        user_sessions[session_id] = updated_summary_array
-        response_json_from_main['full_summary_state'] = user_sessions[session_id]
+        user_sessions[session_id]["summary"] = updated_summary_array
+        user_sessions[session_id]["history"] = updated_history_array
+        response_json_from_main['full_summary_state'] = user_sessions[session_id]["summary"]
+        response_json_from_main['history'] = user_sessions[session_id]["history"]
         
         # Parse the JSON string from main.py and return as Flask JSON response
         return jsonify(response_json_from_main), 200

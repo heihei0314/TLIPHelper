@@ -4,8 +4,9 @@ from openai import AzureOpenAI
 from dotenv import load_dotenv
 
 #library for RAG
-from langchain_huggingface.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
+
 
 
 
@@ -74,7 +75,7 @@ except FileNotFoundError as e:
     print(f"RAG Initialization Error: {e}", file=os.sys.stderr)
     rag_manager = None
 
-def get_openai_reply(user_input, purpose, current_summary_array):
+def get_openai_reply(user_input, purpose, current_summary_array, current_history_array):
     """
     Generates a reply from the OpenAI model based on user input and purpose.
     Manages the summary_array for conversational context.
@@ -92,7 +93,7 @@ def get_openai_reply(user_input, purpose, current_summary_array):
     config = SYSTEM_PROMPTS.get(purpose)
     
     if not config:
-        return json.dumps({"type": "error", "summary": "Invalid purpose provided."}), current_summary_array
+        return json.dumps({"type": "error", "summary": "Invalid purpose provided."}), current_summary_array, current_history_array
 
     # --- Mode 1: Initial Question ---
     if not user_input.strip() and purpose != "integrator":
@@ -101,7 +102,7 @@ def get_openai_reply(user_input, purpose, current_summary_array):
             "question": config["initial_question"],
             "options": config["options"]
         }
-        return json.dumps(response_data), current_summary_array
+        return json.dumps(response_data), current_summary_array, current_history_array
 
     # Mode 2: Call AI and get a structured response
     try:
@@ -133,16 +134,15 @@ def get_openai_reply(user_input, purpose, current_summary_array):
         {retrieved_context}
         """
         
+        # Prepare the summary in text for agents
+        full_summary_text = ""
+        for key, value in current_summary_array.items():
+            if value:
+                full_summary_text += f"**{key.capitalize()}**:\n{value}\n\n"
 
         #Call multi-agents for integrator 
         if purpose == 'integrator':
-            # Step 1: Prepare the context for both agents
-            full_summary_text = ""
-            for key, value in current_summary_array.items():
-                if value:
-                    full_summary_text += f"**{key.capitalize()}**:\n{value}\n\n"
-
-            # Step 2: Call the primary 'integrator' agent to synthesize the proposal
+            # Call the primary 'integrator' agent to synthesize the proposal
             proposal_messages = [
                 {"role": "system", "content": SYSTEM_PROMPTS['integrator']['persona']},
                 {"role": "assistant", "content": full_summary_text},
@@ -157,8 +157,7 @@ def get_openai_reply(user_input, purpose, current_summary_array):
             )
             proposal_output = proposal_completion.choices[0].message.content
 
-            # Step 3: Call the separate 'suggestions' agent
-            # We use the same summary as context but with a new prompt
+            # Call the separate 'suggestions' agent
             suggestions_messages = [
                 {"role": "system", "content": SUGGESTIONS_AGENT_SYSTEM_MESSAGE},
                 {"role": "user", "content": full_summary_text} # The user input for this agent is the summary itself
@@ -179,18 +178,21 @@ def get_openai_reply(user_input, purpose, current_summary_array):
                 "type": "summary_only",
                 "summary": final_combined_output
             }
-            return json.dumps(response_data), current_summary_array
+            return json.dumps(response_data), current_summary_array, current_history_array
 
         #Call agent for general purpose (steps)
         else:
-            # For all general purposes, we only provide the summary for the current purpose.
-            current_purpose_summary = current_summary_array.get(purpose, "")
-            
-            messages = [
-                {"role": "system", "content": system_prompt_with_rag},
-                {"role": "assistant", "content": current_purpose_summary},
-                {"role": "user", "content": user_input}
-            ]
+            # --- Build the messages list for this specific API call ---
+            messages = [{"role": "system", "content": system_prompt_with_rag}]     
+
+            # Retrieve and Append the history for the current purpose
+            messages.extend(current_history_array)
+            current_purpose_summary = current_summary_array.get(purpose, "")     
+            messages.append({"role": "assistant", "content": full_summary_text})       
+            #messages.append({"role": "assistant", "content": current_purpose_summary})
+
+            # Add the current user's input to the messages array
+            messages.append({"role": "user", "content": user_input})
         
             # Use a retry loop to handle JSON errors
             max_retries = 3
@@ -206,22 +208,23 @@ def get_openai_reply(user_input, purpose, current_summary_array):
 
                     # Parse the AI's JSON response for the conversation.
                     ai_response_json = json.loads(ai_response_str)
+
+                    # Update the summary
+                    summary_response = generate_summary(purpose, user_input, current_purpose_summary)
+                    current_summary_array[purpose] = summary_response
+                    current_history_array.append({"role": "user", "content": user_input})
+                    current_history_array.append({"role": "assistant", "content": ai_response_str})
                     # If JSON parsing is successful, break the loop and proceed
                     break
                 except json.JSONDecodeError:
                     # If JSON parsing fails, update the chat history with a correction message
                     correction_prompt = "This response was not a valid JSON. Please restructure the response as a valid JSON object without any additional text. Strictly adhere to the format."
                     # Append the correction to the messages list
-                    # messages.append({"role": "assistant", "content": ai_response_str}) # The instruction to correct
                     messages.append({"role": "user", "content": correction_prompt}) # The instruction to correct
                 
                     if i == max_retries - 1:
                         # If this is the last retry, return a failure message
-                        return json.dumps({"type": "error", "summary": f"Failed to get a valid JSON response after {max_retries} attempts. The AI did not adhere to the format. The response: {ai_response_str}"}), current_summary_array
-
-            # After getting the JSON response, we call a separate function to generate the summary.
-            summary_response = generate_summary(purpose, user_input, current_purpose_summary)
-            current_summary_array[purpose] = summary_response
+                        return json.dumps({"type": "error", "summary": f"Failed to get a valid JSON response after {max_retries} attempts. The AI did not adhere to the format. The response: {ai_response_str}"}), current_summary_array, current_history_array
 
             response_data = {
                 "type": "summary_and_options",
@@ -229,12 +232,12 @@ def get_openai_reply(user_input, purpose, current_summary_array):
                 "follow_up_question": ai_response_json.get("follow_up_question", "AI did not provide a follow-up question."),
                 "options": ai_response_json.get("new_options", [])
             }
-            return json.dumps(response_data), current_summary_array
+            return json.dumps(response_data), current_summary_array, current_history_array
 
     except json.JSONDecodeError:
-        return json.dumps({"type": "error", "summary": f"The AI response for '{purpose}' was not in the expected JSON format. Please try again. The response: {ai_response_str}"}), current_summary_array
+        return json.dumps({"type": "error", "summary": f"The AI response for '{purpose}' was not in the expected JSON format. Please try again. The response: {ai_response_str}"}), current_summary_array, current_history_array
     except Exception as e:
-        return json.dumps({"type": "error", "summary": f"An error occurred during AI processing for '{purpose}': {str(e)}"}), current_summary_array
+        return json.dumps({"type": "error", "summary": f"An error occurred during AI processing for '{purpose}': {str(e)}"}), current_summary_array, current_history_array
 
 
 def generate_summary(purpose, user_input, current_summary_purpose):
@@ -284,7 +287,8 @@ if __name__ == "__main__":
             "objective": "", "outcomes": "", "pedagogy": "",
             "development": "", "implementation": "", "evaluation": ""
         }
-        json_output, test_summary_array = get_openai_reply(user_text, bot_purpose, test_summary_array)
+        test_history_array = []
+        json_output, test_summary_array, test_history_array = get_openai_reply(user_text, bot_purpose, test_summary_array, test_history_array)
         print(json_output)
         print(test_summary_array)
     else:

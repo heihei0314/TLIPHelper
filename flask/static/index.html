@@ -38,6 +38,8 @@
         </div>
       </div>
 
+
+
     <div id="progressBarContainer">
         <div id="progressBar"></div>
         <span id="progressText">0% Complete</span>        
@@ -98,6 +100,12 @@
                         <button type="submit" class="submitBtn" title="Refine Step"><i data-lucide="send">Send</i></button>
                     </div>
                 </form>
+                <p style="margin-bottom:0;margin-top:0;"># To learn more about the <a id="showABCDModelBtn">ABCD model</a>.</p>
+                <div id="imageModal" class="modal">
+                    <span id="closeImageModal">&times;</span>
+                    <img class="modal-content" id="imageModalContent">
+                </div>
+
                 <div class="response-area">Your learning outcomes will be summarized here...</div>
                 <strong>*Please note that the AI's responses are a starting point and may contain inaccuracies. Your review and judgment are essential for all final output.*</strong>
                 <div class="next-step-arrow next-step-down" title="Next Step" data-next-step="pedagogy-container">
@@ -107,7 +115,7 @@
 
             <div class="container" id="pedagogy-container">
                 <div class="step-header">
-                    <h2>3. Find Pedagogy & Technology</h2>
+                    <h2>3. Find Pedagogy / Technology</h2>
                     <button class="restart-btn" data-purpose="objective" title="Restart Step">
                         <i data-lucide="rotate-ccw"></i>
                     </button>

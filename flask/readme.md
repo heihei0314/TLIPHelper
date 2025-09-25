@@ -6,25 +6,32 @@ The backend is powered by a Flask application that interacts with an Azure OpenA
 
 ## Table of Contents
 
-1.  [Features](#features)
-2.  [Architecture](#architecture)
-3.  [Setup Instructions](#setup-instructions)
+1.  [Objectives](#objectives)
+2.  [Features](#features)
+3.  [Architecture](#architecture)
+4.  [Setup Instructions](#setup-instructions)
     * [Prerequisites](#prerequisites)
     * [Environment Variables](#environment-variables)
     * [Installation](#installation)
-4.  [Running the Application](#running-the-application)
-5.  [Running Tests](#running-tests)
-6.  [Project Structure](#project-structure)
-7.  [Usage](#usage)
-8.  [Future Improvements](#future-improvements)
-9.  [License](#license)
+5.  [Running the Application](#running-the-application)
+6.  [Running Tests](#running-tests)
+7.  [Project Structure](#project-structure)
+8.  [Usage](#usage)
+9.  [Future Improvements](#future-improvements)
+10.  [License](#license)
+
+## Objectives
+* 1. Ask Follow-up question to inspire user 
+* 2. Provide related options for user to consider 
+* 3. Explain and Answer User's question on Education and Innovational Development
+* 4. Summary User's idea and plan 
 
 ## Features
 
 * **Multi-Step Guidance:** Guides users through 6 distinct phases of project planning (Objective, Outcomes, Pedagogy, Development, Implementation, Evaluation).
 * **Final Proposal Synthesis:** Integrates all summarized steps into a single, comprehensive project proposal.
 * **AI-Powered Responses:** Utilizes Azure OpenAI to generate summaries, follow-up questions, and new options based on user input and predefined personas for each step.
-* **Contextual AI Grounding (RAG):** The AI's responses are grounded in a knowledge base built from a provided application form, ensuring factual accuracy and relevance.
+* **Contextual AI Grounding (RAG):** The AI's responses are grounded in a knowledge base.
 * **Interactive Frontend:** A clean, responsive web interface allows users to input text or select from AI-generated options.
 * **Progress Tracking:** A progress bar indicates the completion status of the proposal drafting.
 

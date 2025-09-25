@@ -6,6 +6,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressText = document.getElementById('progressText');
     const nextStepArrows = document.querySelectorAll('.next-step-arrow'); // Select all next step arrows
     const restartBtns = document.querySelectorAll('.restart-btn'); // Select all restart buttons
+    const showABCDModelBtn = document.getElementById('showABCDModelBtn');
+    const imageModal = document.getElementById('imageModal');
+    const imageModalContent = document.getElementById('imageModalContent');
+    const closeImageModalBtn = document.getElementById('closeImageModal');
 
     // Define the base path for your TLIP Helper application
     // debug mode
@@ -255,6 +259,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     }
+
+    // handle the image modal
+    showABCDModelBtn.addEventListener('click', function() {
+        imageModal.style.display = 'block';
+        imageModalContent.src = 'assets/ABCD Method.jpg';
+    });
+
+    closeImageModalBtn.addEventListener('click', function() {
+        imageModal.style.display = 'none';
+    });
+
+    // You can also close the modal by clicking outside the image
+    imageModal.addEventListener('click', function(event) {
+        if (event.target === imageModal) {
+            imageModal.style.display = 'none';
+        }
+    });
 
     // Attach event listeners to all chat forms
     chatForms.forEach(form => {

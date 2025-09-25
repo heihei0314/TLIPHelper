@@ -318,10 +318,18 @@ body {
     transition: all 0.2s;
     text-align: left;
 }
-
 .option-button:hover {
     background-color: var(--primary-color);
-    color: white;
+    color: #fff;
+}
+
+.move-to-option{
+    background-color: var(--primary-color);
+    color: #fff;
+}
+.move-to-option:hover {
+    background-color: #fff;
+    color: var(--primary-color);
 }
 
 .input-wrapper {
@@ -370,6 +378,7 @@ body {
 .response-area.completed {
     background-color: #e2f0d9;
     border-color: #c5e0b4;
+    border: 1px solid #c5e0b4;
 }
 
 .next-step-arrow {
@@ -397,6 +406,51 @@ body {
     bottom:-1rem;
 }
 
+/* image modal */
+#imageModal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1001; /* Must be on top of the consent modal */
+    padding-top: 10%;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.9);
+    text-align: center;
+}
+#imageModalContent {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 80%;
+}
+#imageModalContent img {
+    width: 100%;
+    height: auto;
+}
+#closeImageModal {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+    cursor: pointer;
+}
+#closeImageModal:hover,
+#closeImageModal:focus {
+    color: #bbb;
+}
+#showABCDModelBtn    {
+    color: -webkit-link;
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: 500;
+}
 
 .container h2 { margin-top: 0; color: #007bff; }
 input[type="text"] { width: 95%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 0.9rem; }
@@ -409,8 +463,5 @@ button:disabled { background-color: #aaa; cursor: not-allowed; }
 #integrateBtn:hover { background-color: #218838; }
 #finalResponseArea { overflow-y: auto; margin-top: 1.5rem; background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; max-height: 50vh; }
 
-.response-area.completed {
-    background-color: #e2f0d9; /* A light green to signify completion */
-    border: 1px solid #c5e0b4;
-}
+
 

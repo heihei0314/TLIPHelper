@@ -3,8 +3,6 @@ import json
 import sys
 from openai import AzureOpenAI
 from dotenv import load_dotenv
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import Chroma
 
 # Add the backend directory to the Python path to allow importing main
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -51,6 +49,7 @@ def run_evaluation():
 
         # 3. Run evaluation loop
         print("\n--- Starting Evaluation ---")
+        initial_history_array = []
         initial_summary_array = {
             "objective": "", "outcomes": "", "pedagogy": "",
             "development": "", "implementation": "", "evaluation": ""
@@ -62,8 +61,9 @@ def run_evaluation():
             ground_truth = item["ground_truth"]
 
             # Call main.py's get_openai_reply function
-            response_data_str, updated_summary_array = get_openai_reply(query, purpose, initial_summary_array.copy())
+            response_data_str, updated_summary_array, updated_history_array = get_openai_reply(query, purpose, initial_summary_array.copy(),initial_history_array.copy())
             initial_summary_array = updated_summary_array
+            initial_history_array = updated_history_array
             # --- Printing for Debugging ---
             print(f"\n[DEBUG] --- Test Case: {purpose} | Query: '{query}' ---")
             print("[DEBUG] Response JSON String:")

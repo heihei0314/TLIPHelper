@@ -2,9 +2,8 @@ import os
 import json
 from openai import AzureOpenAI
 from dotenv import load_dotenv
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import Chroma
-
+from langchain_chroma import Chroma
+from langchain_huggingface import HuggingFaceEmbeddings
 # --- Configuration ---
 # Load environment variables
 dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
