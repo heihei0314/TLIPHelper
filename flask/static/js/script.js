@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
     const nextStepArrows = document.querySelectorAll('.next-step-arrow'); // Select all next step arrows
+    const restartBtns = document.querySelectorAll('.restart-btn'); // Select all restart buttons
 
     // Define the base path for your TLIP Helper application
     // debug mode
@@ -214,6 +215,47 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Function to reset a step
+    async function handleRestart(event) {
+        const purpose = event.currentTarget.dataset.purpose;
+        const formElement = document.querySelector(`.chatForm[data-purpose="${purpose}"]`);
+        const responseArea = formElement.parentElement.querySelector('.response-area');
+        const guidingQuestionDiv = formElement.querySelector('.guiding-question');
+
+        // Reset the summary and completed status for this purpose
+        for (const purpose in currentSummaries) {
+            if (Object.hasOwnProperty.call(currentSummaries, purpose)) {
+                currentSummaries[purpose] = "";
+            }
+        }
+        
+        // Reset all completed statuses to 0
+        for (const purpose in completedStatus) {
+            if (Object.hasOwnProperty.call(completedStatus, purpose)) {
+                completedStatus[purpose] = 0;
+            }
+        }
+        updateProgressBar();
+
+        // Clear the response area
+        responseArea.textContent = `Your ${purpose} will be summarized here...`;
+        
+        // Clear the final response area
+        const finalResponseArea = document.getElementById('finalResponseArea');
+        finalResponseArea.textContent = 'The first draft of the project plan will be generated here...';
+
+        // Clear the guiding question
+        guidingQuestionDiv.textContent = '';
+
+        // Trigger an initial request to reload the step's first question
+        await handleSubmit({ preventDefault: () => {}, target: formElement });
+
+        // Scroll back to the top of the container
+        formElement.parentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+
+    }
+
     // Attach event listeners to all chat forms
     chatForms.forEach(form => {
         form.addEventListener('submit', handleSubmit);
@@ -254,8 +296,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Add event listeners for the next step arrows (these are separate from options)
-    // These are the arrows at the bottom-right of each container, not the new "Move to" buttons
+    // Event listeners for the next step arrows (these are separate from options)
     nextStepArrows.forEach(arrow => {
         arrow.addEventListener('click', () => {
             const nextStepId = arrow.dataset.nextStep;
@@ -268,6 +309,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Attach event listeners to all restart buttons
+    restartBtns.forEach(button => {
+        button.addEventListener('click', handleRestart);
+    });
     
 
 

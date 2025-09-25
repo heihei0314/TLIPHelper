@@ -184,15 +184,15 @@ body {
 
 .bots-grid { 
     display: flex; 
-    flex-direction: row; /* Single row layout */
+    flex-direction: column; /* Steps layout in Column*/
     align-items: flex-start;     
     flex-wrap: nowrap;
     justify-content: flex-start; 
     gap: 1.5rem; 
     padding: 0 2rem;
-    overflow: auto;
     max-width: 60vw;
     margin: 0 auto;
+    /*overflow: auto;  /*Scrolling for horizontal layout*/
 }
 
 /* --- Bot Container Styling --- */
@@ -216,6 +216,7 @@ body {
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 1rem;
     margin-bottom: 1.5rem;
+    position: relative; /* Add position relative to allow absolute positioning of the button */
 }
 .step-header h2 {
     margin: 0;
@@ -226,7 +227,23 @@ body {
     width: 32px;
     height: 32px;
 }
-
+/* --- Restart Button Styles --- */
+.restart-btn {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    background-color: transparent;
+    border: none;
+    color: var(--light-text-color);
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+    padding:0.3rem;
+    padding-bottom:0rem;
+}
+.restart-btn:hover {
+    color: white;
+}
 /* --- Dynamic Guiding Question --- */
 .chat-message-row {
     display: flex;
@@ -375,6 +392,11 @@ body {
     font-size: 1.25rem; /* ~20px. Adjust as needed. */
     line-height: 1;   /* Prevents extra vertical space */
 }
+.next-step-down{
+    right: calc(50% - 22px); 
+    bottom:-1rem;
+}
+
 
 .container h2 { margin-top: 0; color: #007bff; }
 input[type="text"] { width: 95%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 0.9rem; }
@@ -391,3 +413,4 @@ button:disabled { background-color: #aaa; cursor: not-allowed; }
     background-color: #e2f0d9; /* A light green to signify completion */
     border: 1px solid #c5e0b4;
 }
+
